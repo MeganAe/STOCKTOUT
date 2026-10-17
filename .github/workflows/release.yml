@@ -2,18 +2,21 @@ name: Release
 
 # Compilation + publication manuelle multi-plateforme / multi-architecture.
 # Lancement : onglet Actions > Release > Run workflow.
-# Prerequis : mettre le repo sur GitHub, tag ou saisie manuelle de version.
 #
 # Produit :
-#  - Windows x64 + ARM64 (.zip + installateur)
-#  - macOS Intel (x64) + Silicon (arm64) (.dmg + .zip)
-#  - Linux x64 + ARM64 (.AppImage, .deb, .tar.gz)
+#  - Windows x64 + ARM64 (.zip)
+#  - macOS Intel (x64) + Silicon (arm64) (.zip avec .app)
+#  - Linux x64 (.tar.gz)
+#
+# Note : pas de Linux ARM64, Flutter ne publie pas de SDK Linux ARM64
+# (voir docs/BUILD.md). Des que ca existe, rajouter le job linux-arm64
+# sur le modele de linux-x64 avec runs-on: ubuntu-22.04-arm.
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version (ex: 1.0.0). Laisse vide pour utiliser pubspec.yaml"
+        description: "Version (ex: 1.0.2). Laisse vide pour utiliser pubspec.yaml"
         required: false
         default: ""
         type: string
@@ -89,6 +92,9 @@ jobs:
           path: ${{ env.APP_NAME }}-windows-x64-*.zip
 
   windows-arm64:
+    # Le SDK Flutter Windows n'existe qu'en x64 : il tourne emule sur le
+    # runner ARM64, mais `flutter build windows` produit bien des binaires
+    # ARM64 natifs (supporte depuis Flutter 3.22). Donc : pas de `architecture:`.
     if: inputs.platforms == 'all' || inputs.platforms == 'windows'
     needs: resolve-version
     runs-on: windows-11-arm
@@ -98,7 +104,6 @@ jobs:
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
           channel: stable
-          architecture: arm64
       - run: flutter config --enable-windows-desktop
       - run: flutter pub get
       - run: flutter build windows --release
@@ -189,33 +194,6 @@ jobs:
           name: linux-x64
           path: ${{ env.APP_NAME }}-linux-x64-*.tar.gz
 
-  linux-arm64:
-    if: inputs.platforms == 'all' || inputs.platforms == 'linux'
-    needs: resolve-version
-    runs-on: ubuntu-22.04-arm
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install deps
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsqlite3-dev
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-          architecture: arm64
-      - run: flutter config --enable-linux-desktop
-      - run: flutter pub get
-      - run: flutter build linux --release
-      - name: Package tar.gz
-        run: |
-          VER="${{ needs.resolve-version.outputs.version }}"
-          tar -czvf ${{ env.APP_NAME }}-linux-arm64-$VER.tar.gz -C build/linux/arm64/release bundle
-      - uses: actions/upload-artifact@v4
-        with:
-          name: linux-arm64
-          path: ${{ env.APP_NAME }}-linux-arm64-*.tar.gz
-
   # ---------------- PUBLICATION ----------------
   publish:
     needs:
@@ -225,7 +203,6 @@ jobs:
       - macos-x64
       - macos-arm64
       - linux-x64
-      - linux-arm64
     if: always() && needs.resolve-version.result == 'success'
     runs-on: ubuntu-latest
     steps:
@@ -253,7 +230,6 @@ jobs:
             | macOS | Intel | `stockpro-macos-x64-${{ needs.resolve-version.outputs.version }}.zip` |
             | macOS | Silicon | `stockpro-macos-arm64-${{ needs.resolve-version.outputs.version }}.zip` |
             | Linux | x64 | `stockpro-linux-x64-${{ needs.resolve-version.outputs.version }}.tar.gz` |
-            | Linux | ARM64 | `stockpro-linux-arm64-${{ needs.resolve-version.outputs.version }}.tar.gz` |
 
             ### Installation
             - **Windows** : decompressez le ZIP, lancez `stockpro.exe`.
@@ -261,3 +237,4 @@ jobs:
             - **Linux** : `tar -xzf stockpro-linux-*.tar.gz && ./stockpro/stockpro`
 
             > Builds produits automatiquement par le workflow manuel `Release`.
+            > Linux ARM64 non inclus : Flutter ne publie pas de SDK Linux ARM64.

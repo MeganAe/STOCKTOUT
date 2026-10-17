@@ -36,7 +36,11 @@ git push -u origin main
 | macos-x64 | macos-13 (Intel) | ZIP avec `StockPro.app` |
 | macos-arm64 | macos-14 (Silicon) | ZIP avec `StockPro.app` |
 | linux-x64 | ubuntu-22.04 | tar.gz du bundle |
-| linux-arm64 | ubuntu-22.04-arm | tar.gz du bundle |
+
+Pas de job `linux-arm64` : Flutter ne publie officiellement que des SDK
+Linux x64 (verifie sur les manifests de release, methode `dart_sdk_arch`).
+Le jour ou un SDK Linux ARM64 sort, dupliquer le job `linux-x64` avec
+`runs-on: ubuntu-22.04-arm`.
 
 ## 4. Installer
 

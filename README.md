@@ -29,7 +29,9 @@ Allez dans **Releases** sur GitHub et prenez le fichier pour votre systeme :
 | macOS Intel | `stockpro-macos-x64-VERSION.zip` |
 | macOS Silicon | `stockpro-macos-arm64-VERSION.zip` |
 | Linux x64 | `stockpro-linux-x64-VERSION.tar.gz` |
-| Linux ARM | `stockpro-linux-arm64-VERSION.tar.gz` |
+
+> Linux ARM64 : pas encore — Flutter ne publie pas de SDK Linux ARM64.
+> Des que ca existe, le job sera rajoute au workflow.
 
 Installation : voir [docs/BUILD.md](docs/BUILD.md).
 
