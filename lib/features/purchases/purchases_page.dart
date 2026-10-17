@@ -23,8 +23,8 @@ class _PurchasesPageState extends ConsumerState<PurchasesPage> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    _rows = await AppDatabase.instance.db
-        .query('purchases', orderBy: 'date DESC');
+    _rows =
+        await AppDatabase.instance.db.query('purchases', orderBy: 'date DESC');
     setState(() => _loading = false);
   }
 
@@ -65,7 +65,8 @@ class _PurchasesPageState extends ConsumerState<PurchasesPage> {
                               ? Colors.green
                               : Colors.orange,
                         ),
-                        title: Text('${r['number']} — ${r['supplier_name'] ?? ''}'),
+                        title: Text(
+                            '${r['number']} — ${r['supplier_name'] ?? ''}'),
                         subtitle: Text(
                             '${r['date']} · ${r['notes'] ?? ''} · $status'),
                         trailing: status == 'received'
@@ -111,8 +112,7 @@ class _PurchasesPageState extends ConsumerState<PurchasesPage> {
             const SizedBox(height: 12),
             TextField(
                 controller: supp,
-                decoration:
-                    const InputDecoration(labelText: 'Fournisseur')),
+                decoration: const InputDecoration(labelText: 'Fournisseur')),
           ],
         ),
         actions: [

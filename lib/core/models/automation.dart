@@ -12,8 +12,8 @@ enum AutoTrigger {
   final String value;
   const AutoTrigger(this.value);
 
-  static AutoTrigger from(String v) =>
-      values.firstWhere((e) => e.value == v, orElse: () => AutoTrigger.stockLow);
+  static AutoTrigger from(String v) => values.firstWhere((e) => e.value == v,
+      orElse: () => AutoTrigger.stockLow);
 }
 
 /// Actions disponibles.

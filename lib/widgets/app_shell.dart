@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../core/l10n/app_localizations.dart';
-import '../core/providers/app_providers.dart';
 import '../features/about/about_page.dart';
 import '../features/automation/automation_page.dart';
 import '../features/dashboard/dashboard_page.dart';

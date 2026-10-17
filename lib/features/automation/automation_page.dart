@@ -73,7 +73,9 @@ class AutomationPage extends ConsumerWidget {
       BuildContext context, WidgetRef ref, AutomationRule? rule) async {
     final name = TextEditingController(text: rule?.name ?? '');
     AutoTrigger trigger = rule?.trigger ?? AutoTrigger.stockLow;
-    final selected = <AutoAction>{...(rule?.actions ?? [AutoAction.notify])};
+    final selected = <AutoAction>{
+      ...(rule?.actions ?? [AutoAction.notify])
+    };
 
     final ok = await showDialog<bool>(
       context: context,
@@ -93,12 +95,11 @@ class AutomationPage extends ConsumerWidget {
                 DropdownButtonFormField<AutoTrigger>(
                   value: trigger,
                   items: AutoTrigger.values
-                      .map((e) => DropdownMenuItem(
-                          value: e, child: Text(e.value)))
+                      .map((e) =>
+                          DropdownMenuItem(value: e, child: Text(e.value)))
                       .toList(),
                   onChanged: (v) => setState(() => trigger = v!),
-                  decoration:
-                      const InputDecoration(labelText: 'Declencheur'),
+                  decoration: const InputDecoration(labelText: 'Declencheur'),
                 ),
                 const SizedBox(height: 12),
                 ...AutoAction.values.map((a) => CheckboxListTile(

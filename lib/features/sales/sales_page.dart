@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
@@ -90,8 +91,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                               child: Padding(
                                 padding: const EdgeInsets.all(10),
                                 child: Column(
-                                  crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(p.name,
                                         maxLines: 2,
@@ -107,11 +107,11 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceBetween,
                                       children: [
-                                        Text(
-                                            '${p.sellPrice.toStringAsFixed(2)}',
+                                        Text(p.sellPrice.toStringAsFixed(2),
                                             style: const TextStyle(
                                                 fontWeight: FontWeight.bold)),
-                                        Text('x${p.quantity.toStringAsFixed(0)}',
+                                        Text(
+                                            'x${p.quantity.toStringAsFixed(0)}',
                                             style: Theme.of(context)
                                                 .textTheme
                                                 .bodySmall),
@@ -200,7 +200,8 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                         ],
                         onChanged: (v) =>
                             setState(() => _payment = v ?? 'Especes'),
-                        decoration: const InputDecoration(labelText: 'Paiement'),
+                        decoration:
+                            const InputDecoration(labelText: 'Paiement'),
                       ),
                       const SizedBox(height: 8),
                       Row(
@@ -266,8 +267,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
   Future<void> _checkout() async {
     final settings = ref.read(settingsProvider);
     final number = 'V-${DateTime.now().millisecondsSinceEpoch % 1000000}';
-    final linesJson =
-        jsonEncode(_cart.map((e) => e.toMap()).toList());
+    final linesJson = jsonEncode(_cart.map((e) => e.toMap()).toList());
 
     await AppDatabase.instance.insertSale({
       'id': const Uuid().v4(),

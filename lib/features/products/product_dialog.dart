@@ -80,8 +80,7 @@ class _ProductDialogState extends State<ProductDialog> {
                     Expanded(
                         child: TextFormField(
                             controller: _sku,
-                            decoration:
-                                InputDecoration(labelText: t.sku))),
+                            decoration: InputDecoration(labelText: t.sku))),
                     const SizedBox(width: 12),
                     Expanded(
                         child: TextFormField(

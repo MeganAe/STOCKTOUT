@@ -21,7 +21,8 @@ class AppSettings {
     this.currency = 'USD',
   });
 
-  AppSettings copyWith({Locale? locale, ThemeMode? themeMode, String? currency}) =>
+  AppSettings copyWith(
+          {Locale? locale, ThemeMode? themeMode, String? currency}) =>
       AppSettings(
         locale: locale ?? this.locale,
         themeMode: themeMode ?? this.themeMode,
@@ -59,7 +60,11 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     state = state.copyWith(themeMode: m);
     await AppDatabase.instance.setSetting(
       'theme',
-      m == ThemeMode.dark ? 'dark' : m == ThemeMode.light ? 'light' : 'system',
+      m == ThemeMode.dark
+          ? 'dark'
+          : m == ThemeMode.light
+              ? 'light'
+              : 'system',
     );
   }
 
@@ -87,8 +92,7 @@ final automationEngineProvider = Provider<AutomationEngine>((ref) {
 
 // ---------- Donnees ----------
 
-final productsProvider =
-    FutureProvider.autoDispose<List<Product>>((ref) async {
+final productsProvider = FutureProvider.autoDispose<List<Product>>((ref) async {
   final q = ref.watch(productSearchProvider);
   return AppDatabase.instance.allProducts(query: q);
 });

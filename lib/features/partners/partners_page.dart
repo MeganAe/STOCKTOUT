@@ -22,8 +22,15 @@ class _PartnersPageState extends State<PartnersPage>
     _load();
   }
 
+  @override
+  void dispose() {
+    _tab.dispose();
+    super.dispose();
+  }
+
   Future<void> _load() async {
-    _rows = await AppDatabase.instance.db.query('partners', orderBy: 'name ASC');
+    _rows =
+        await AppDatabase.instance.db.query('partners', orderBy: 'name ASC');
     setState(() {});
   }
 
@@ -79,8 +86,8 @@ class _PartnersPageState extends State<PartnersPage>
             trailing: IconButton(
               icon: const Icon(Icons.delete_outline),
               onPressed: () async {
-                await AppDatabase.instance.db.delete('partners',
-                    where: 'id = ?', whereArgs: [r['id']]);
+                await AppDatabase.instance.db
+                    .delete('partners', where: 'id = ?', whereArgs: [r['id']]);
                 _load();
               },
             ),
@@ -97,18 +104,27 @@ class _PartnersPageState extends State<PartnersPage>
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(kind == 'customer' ? 'Nouveau client' : 'Nouveau fournisseur'),
+        title:
+            Text(kind == 'customer' ? 'Nouveau client' : 'Nouveau fournisseur'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Nom')),
+            TextField(
+                controller: name,
+                decoration: const InputDecoration(labelText: 'Nom')),
             const SizedBox(height: 12),
-            TextField(controller: phone, decoration: const InputDecoration(labelText: 'Telephone')),
+            TextField(
+                controller: phone,
+                decoration: const InputDecoration(labelText: 'Telephone')),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enregistrer')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Annuler')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Enregistrer')),
         ],
       ),
     );

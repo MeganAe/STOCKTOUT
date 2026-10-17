@@ -13,7 +13,6 @@ class DashboardPage extends ConsumerWidget {
     final productsAsync = ref.watch(productsProvider);
     final salesAsync = ref.watch(salesProvider);
     final settings = ref.watch(settingsProvider);
-    final currency = ref.watch(currencyServiceProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(t.dashboard)),
@@ -31,8 +30,9 @@ class DashboardPage extends ConsumerWidget {
               data: (products) {
                 final low =
                     products.where((e) => e.isLowStock).toList(growable: false);
-                final out =
-                    products.where((e) => e.isOutOfStock).toList(growable: false);
+                final out = products
+                    .where((e) => e.isOutOfStock)
+                    .toList(growable: false);
                 final value =
                     products.fold<double>(0, (s, e) => s + e.stockValue);
                 return Wrap(
@@ -78,8 +78,8 @@ class DashboardPage extends ConsumerWidget {
                               style: Theme.of(context).textTheme.titleMedium),
                           const SizedBox(height: 8),
                           salesAsync.when(
-                            loading: () =>
-                                const Center(child: CircularProgressIndicator()),
+                            loading: () => const Center(
+                                child: CircularProgressIndicator()),
                             error: (e, _) => Text('$e'),
                             data: (sales) {
                               if (sales.isEmpty) {
@@ -95,7 +95,8 @@ class DashboardPage extends ConsumerWidget {
                                     leading: const Icon(Icons.receipt_long),
                                     title: Text('${s['number']}'),
                                     subtitle: Text('${s['date']}'),
-                                    trailing: Text('${s['customer_name'] ?? ''}'),
+                                    trailing:
+                                        Text('${s['customer_name'] ?? ''}'),
                                   );
                                 }).toList(),
                               );

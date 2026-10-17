@@ -42,8 +42,17 @@ class AppCurrency {
   static List<AppCurrency> defaults() => const [
         AppCurrency(code: 'USD', symbol: r'$', name: 'Dollar americain'),
         AppCurrency(code: 'EUR', symbol: '€', name: 'Euro'),
-        AppCurrency(code: 'CDF', symbol: 'FC', name: 'Franc congolais', decimals: 0),
-        AppCurrency(code: 'XAF', symbol: 'FCFA', name: 'Franc CFA (CEMAC)', decimals: 0),
-        AppCurrency(code: 'XOF', symbol: 'FCFA', name: 'Franc CFA (UEMOA)', decimals: 0),
+        AppCurrency(
+            code: 'CDF', symbol: 'FC', name: 'Franc congolais', decimals: 0),
+        AppCurrency(
+            code: 'XAF',
+            symbol: 'FCFA',
+            name: 'Franc CFA (CEMAC)',
+            decimals: 0),
+        AppCurrency(
+            code: 'XOF',
+            symbol: 'FCFA',
+            name: 'Franc CFA (UEMOA)',
+            decimals: 0),
       ];
 }

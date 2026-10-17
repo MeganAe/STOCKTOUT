@@ -13,7 +13,15 @@ class ReportService {
   Future<String> productsCsv() async {
     final products = await db.allProducts();
     final rows = <List<Object?>>[
-      ['SKU', 'Nom', 'Categorie', 'Quantite', 'Prix achat', 'Prix vente', 'Valeur'],
+      [
+        'SKU',
+        'Nom',
+        'Categorie',
+        'Quantite',
+        'Prix achat',
+        'Prix vente',
+        'Valeur'
+      ],
       ...products.map((e) => [
             e.sku,
             e.name,

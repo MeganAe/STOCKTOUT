@@ -82,8 +82,7 @@ class _InventoryPageState extends ConsumerState<InventoryPage> {
                                         ? Colors.green
                                         : Colors.red,
                                   ),
-                                  title: Text(
-                                      '${m.type.name} — ${m.quantity}'),
+                                  title: Text('${m.type.name} — ${m.quantity}'),
                                   subtitle: Text(
                                       '${m.date.toLocal()}${m.reason != null ? ' · ${m.reason}' : ''}'),
                                   trailing: Text(m.reference ?? ''),

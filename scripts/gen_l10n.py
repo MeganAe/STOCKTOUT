@@ -73,8 +73,11 @@ lines.append("          const AppLocalizations(Locale('en'));")
 lines.append("")
 lines.append("  static const _v = <String, Map<String, String>>{")
 for key, vals in T.items():
-    inner = ", ".join(f"'{l}': {json.dumps(vals.get(l, vals['en']), ensure_ascii=False)}" for l in LANGS)
-    lines.append(f"    '{key}': {{$inner}},")
+    def dq(s):
+        s = s.replace('\\', '\\\\').replace("'", "\\'").replace('$', '\\$')
+        return f"'{s}'"
+    inner = ", ".join(f"'{l}': {dq(vals.get(l, vals['en']))}" for l in LANGS)
+    lines.append(f"    '{key}': {{{inner}}},")
 lines.append("  };")
 lines.append("")
 lines.append("  String _t(String key) =>")

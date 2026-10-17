@@ -65,8 +65,8 @@ class SettingsPage extends ConsumerWidget {
                   DropdownButtonFormField<String>(
                     value: settings.locale.languageCode,
                     items: _langs
-                        .map((e) => DropdownMenuItem(
-                            value: e[0], child: Text(e[1])))
+                        .map((e) =>
+                            DropdownMenuItem(value: e[0], child: Text(e[1])))
                         .toList(),
                     onChanged: (v) {
                       if (v != null) {
@@ -88,8 +88,7 @@ class SettingsPage extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(t.theme,
-                      style: Theme.of(context).textTheme.titleMedium),
+                  Text(t.theme, style: Theme.of(context).textTheme.titleMedium),
                   const SizedBox(height: 8),
                   SegmentedButton<ThemeMode>(
                     segments: const [
@@ -107,9 +106,8 @@ class SettingsPage extends ConsumerWidget {
                           icon: Icon(Icons.settings_suggest)),
                     ],
                     selected: {settings.themeMode},
-                    onSelectionChanged: (s) => ref
-                        .read(settingsProvider.notifier)
-                        .setTheme(s.first),
+                    onSelectionChanged: (s) =>
+                        ref.read(settingsProvider.notifier).setTheme(s.first),
                   ),
                 ],
               ),
@@ -145,12 +143,11 @@ class SettingsPage extends ConsumerWidget {
                         return ListTile(
                           dense: true,
                           leading: isBase
-                              ? const Icon(Icons.star,
-                                  color: Colors.amber)
+                              ? const Icon(Icons.star, color: Colors.amber)
                               : const Icon(Icons.monetization_on_outlined),
                           title: Text('${c.code} — ${c.name}'),
-                          subtitle:
-                              Text('Symbole: ${c.symbol} · Taux: ${c.rateToBase}'),
+                          subtitle: Text(
+                              'Symbole: ${c.symbol} · Taux: ${c.rateToBase}'),
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -163,8 +160,7 @@ class SettingsPage extends ConsumerWidget {
                                 ),
                               IconButton(
                                 icon: const Icon(Icons.edit_outlined, size: 18),
-                                onPressed: () =>
-                                    _editRate(context, ref, c),
+                                onPressed: () => _editRate(context, ref, c),
                               ),
                             ],
                           ),
@@ -228,15 +224,30 @@ class SettingsPage extends ConsumerWidget {
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            TextField(controller: code, decoration: const InputDecoration(labelText: 'Code (ex: CDF, NGN, KES)')),
-            TextField(controller: symbol, decoration: const InputDecoration(labelText: 'Symbole (ex: FC)')),
-            TextField(controller: name, decoration: const InputDecoration(labelText: 'Nom')),
-            TextField(controller: rate, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'Taux')),
+            TextField(
+                controller: code,
+                decoration: const InputDecoration(
+                    labelText: 'Code (ex: CDF, NGN, KES)')),
+            TextField(
+                controller: symbol,
+                decoration:
+                    const InputDecoration(labelText: 'Symbole (ex: FC)')),
+            TextField(
+                controller: name,
+                decoration: const InputDecoration(labelText: 'Nom')),
+            TextField(
+                controller: rate,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(labelText: 'Taux')),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enregistrer')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Annuler')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Enregistrer')),
         ],
       ),
     );
@@ -263,8 +274,12 @@ class SettingsPage extends ConsumerWidget {
             keyboardType: TextInputType.number,
             decoration: const InputDecoration(labelText: 'Taux')),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Annuler')),
-          FilledButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Enregistrer')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Annuler')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Enregistrer')),
         ],
       ),
     );
@@ -276,8 +291,8 @@ class SettingsPage extends ConsumerWidget {
   }
 
   Future<void> _backup(BuildContext context) async {
-    final dir = await FilePicker.platform.getDirectoryPath(
-        dialogTitle: 'Dossier de sauvegarde');
+    final dir = await FilePicker.platform
+        .getDirectoryPath(dialogTitle: 'Dossier de sauvegarde');
     if (dir != null) {
       final path = await BackupService().backup(dir);
       if (context.mounted) {
