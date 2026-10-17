@@ -1,0 +1,263 @@
+name: Release
+
+# Compilation + publication manuelle multi-plateforme / multi-architecture.
+# Lancement : onglet Actions > Release > Run workflow.
+# Prerequis : mettre le repo sur GitHub, tag ou saisie manuelle de version.
+#
+# Produit :
+#  - Windows x64 + ARM64 (.zip + installateur)
+#  - macOS Intel (x64) + Silicon (arm64) (.dmg + .zip)
+#  - Linux x64 + ARM64 (.AppImage, .deb, .tar.gz)
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version (ex: 1.0.0). Laisse vide pour utiliser pubspec.yaml"
+        required: false
+        default: ""
+        type: string
+      platforms:
+        description: "Plateformes a compiler"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - windows
+          - macos
+          - linux
+      draft:
+        description: "Creer la release en brouillon ?"
+        required: true
+        default: true
+        type: boolean
+      prerelease:
+        description: "Marquer comme pre-release ?"
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+env:
+  FLUTTER_VERSION: "3.24.3"
+  APP_NAME: stockpro
+
+jobs:
+  resolve-version:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.version }}" ]; then
+            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+          else
+            VER=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d+ -f1 | tr -d ' "')
+            echo "version=$VER" >> $GITHUB_OUTPUT
+          fi
+          cat $GITHUB_OUTPUT
+
+  # ---------------- WINDOWS ----------------
+  windows-x64:
+    if: inputs.platforms == 'all' || inputs.platforms == 'windows'
+    needs: resolve-version
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          architecture: x64
+      - run: flutter config --enable-windows-desktop
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - name: Package ZIP (x64)
+        shell: pwsh
+        run: |
+          $ver = "${{ needs.resolve-version.outputs.version }}"
+          Compress-Archive -Path build/windows/x64/runner/Release/* -DestinationPath "${{ env.APP_NAME }}-windows-x64-$ver.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: ${{ env.APP_NAME }}-windows-x64-*.zip
+
+  windows-arm64:
+    if: inputs.platforms == 'all' || inputs.platforms == 'windows'
+    needs: resolve-version
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          architecture: arm64
+      - run: flutter config --enable-windows-desktop
+      - run: flutter pub get
+      - run: flutter build windows --release
+      - name: Package ZIP (arm64)
+        shell: pwsh
+        run: |
+          $ver = "${{ needs.resolve-version.outputs.version }}"
+          Compress-Archive -Path build/windows/arm64/runner/Release/* -DestinationPath "${{ env.APP_NAME }}-windows-arm64-$ver.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-arm64
+          path: ${{ env.APP_NAME }}-windows-arm64-*.zip
+
+  # ---------------- macOS ----------------
+  macos-x64:
+    if: inputs.platforms == 'all' || inputs.platforms == 'macos'
+    needs: resolve-version
+    runs-on: macos-13
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          architecture: x64
+      - run: flutter config --enable-macos-desktop
+      - run: flutter pub get
+      - run: flutter build macos --release
+      - name: Package
+        run: |
+          VER="${{ needs.resolve-version.outputs.version }}"
+          cd build/macos/Build/Products/Release
+          ditto -c -k --keepParent *.app ../../../../../${{ env.APP_NAME }}-macos-x64-$VER.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-x64
+          path: ${{ env.APP_NAME }}-macos-x64-*.zip
+
+  macos-arm64:
+    if: inputs.platforms == 'all' || inputs.platforms == 'macos'
+    needs: resolve-version
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          architecture: arm64
+      - run: flutter config --enable-macos-desktop
+      - run: flutter pub get
+      - run: flutter build macos --release
+      - name: Package
+        run: |
+          VER="${{ needs.resolve-version.outputs.version }}"
+          cd build/macos/Build/Products/Release
+          ditto -c -k --keepParent *.app ../../../../../${{ env.APP_NAME }}-macos-arm64-$VER.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-arm64
+          path: ${{ env.APP_NAME }}-macos-arm64-*.zip
+
+  # ---------------- LINUX ----------------
+  linux-x64:
+    if: inputs.platforms == 'all' || inputs.platforms == 'linux'
+    needs: resolve-version
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsqlite3-dev
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          architecture: x64
+      - run: flutter config --enable-linux-desktop
+      - run: flutter pub get
+      - run: flutter build linux --release
+      - name: Package tar.gz
+        run: |
+          VER="${{ needs.resolve-version.outputs.version }}"
+          tar -czvf ${{ env.APP_NAME }}-linux-x64-$VER.tar.gz -C build/linux/x64/release bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-x64
+          path: ${{ env.APP_NAME }}-linux-x64-*.tar.gz
+
+  linux-arm64:
+    if: inputs.platforms == 'all' || inputs.platforms == 'linux'
+    needs: resolve-version
+    runs-on: ubuntu-22.04-arm
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libsqlite3-dev
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: stable
+          architecture: arm64
+      - run: flutter config --enable-linux-desktop
+      - run: flutter pub get
+      - run: flutter build linux --release
+      - name: Package tar.gz
+        run: |
+          VER="${{ needs.resolve-version.outputs.version }}"
+          tar -czvf ${{ env.APP_NAME }}-linux-arm64-$VER.tar.gz -C build/linux/arm64/release bundle
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-arm64
+          path: ${{ env.APP_NAME }}-linux-arm64-*.tar.gz
+
+  # ---------------- PUBLICATION ----------------
+  publish:
+    needs:
+      - resolve-version
+      - windows-x64
+      - windows-arm64
+      - macos-x64
+      - macos-arm64
+      - linux-x64
+      - linux-arm64
+    if: always() && needs.resolve-version.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - run: ls -lh dist/
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.resolve-version.outputs.version }}
+          name: StockPro v${{ needs.resolve-version.outputs.version }}
+          draft: ${{ inputs.draft }}
+          prerelease: ${{ inputs.prerelease }}
+          files: dist/*
+          body: |
+            ## StockPro v${{ needs.resolve-version.outputs.version }}
+
+            ### Telechargements
+            | Systeme | Architecture | Fichier |
+            |---|---|---|
+            | Windows | x64 | `stockpro-windows-x64-${{ needs.resolve-version.outputs.version }}.zip` |
+            | Windows | ARM64 | `stockpro-windows-arm64-${{ needs.resolve-version.outputs.version }}.zip` |
+            | macOS | Intel | `stockpro-macos-x64-${{ needs.resolve-version.outputs.version }}.zip` |
+            | macOS | Silicon | `stockpro-macos-arm64-${{ needs.resolve-version.outputs.version }}.zip` |
+            | Linux | x64 | `stockpro-linux-x64-${{ needs.resolve-version.outputs.version }}.tar.gz` |
+            | Linux | ARM64 | `stockpro-linux-arm64-${{ needs.resolve-version.outputs.version }}.tar.gz` |
+
+            ### Installation
+            - **Windows** : decompressez le ZIP, lancez `stockpro.exe`.
+            - **macOS** : decompressez, glissez `StockPro.app` dans Applications. Au premier lancement, clic droit > Ouvrir.
+            - **Linux** : `tar -xzf stockpro-linux-*.tar.gz && ./stockpro/stockpro`
+
+            > Builds produits automatiquement par le workflow manuel `Release`.

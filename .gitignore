@@ -1,0 +1,34 @@
+# Misc
+.DS_Store
+.idea/
+.vscode/
+*.iml
+
+# Flutter / Dart
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+.flutter_build/
+
+# SQLite local dev
+*.db
+*.db-journal
+
+# OS
+Thumbs.db
+
+# Release artifacts (built by CI)
+*.msix
+*.exe
+*.dmg
+*.AppImage
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+
+# Env
+.env
+.env.local
