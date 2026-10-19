@@ -32,3 +32,6 @@ Thumbs.db
 # Env
 .env
 .env.local
+
+# Fichiers generes par flutter build/pub (ne jamais commiter)
+**/ephemeral/

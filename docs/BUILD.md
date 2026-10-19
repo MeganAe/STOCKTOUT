@@ -51,13 +51,17 @@ Les deux seront re-essayes apres montee de version Flutter.
 
 ## 4. Installer
 
-**Windows** : decompressez le ZIP, double-cliquez `stocktout.exe`.
-Si SmartScreen bloque : clic droit > Proprietes > debloquer, ou signez le binaire
+**Windows** : lancez le `*-setup.exe` (recommande). Assistant en francais
+ou anglais, installation sans droits admin (dossier utilisateur), raccourcis
+menu Demarrer (+ bureau en option), desinstalleur inclus.
+Alternative : le ZIP portable, a decompresser ou vous voulez.
+Si SmartScreen affiche un avertissement : "Informations complementaires" >
+"Executer quand meme". Pour le supprimer, il faut signer le binaire
 (voir section signature).
 
-**macOS** : decompressez, glissez `StockTout.app` dans Applications.
+**macOS** : ouvrez le DMG, glissez `StockTout` vers Applications.
 Premier lancement : clic droit > Ouvrir > Ouvrir (bypass Gatekeeper pour les
-apps non signees).
+apps non signees). Le ZIP reste dispo en secours.
 
 **Linux** :
 ```bash
@@ -85,7 +89,24 @@ git add -A && git commit -m "1.1.0" && git push
 - **Linux** : pas de signature requise. Un `.deb` peut etre ajoute plus tard
   (voir `scripts/`).
 
-## 7. CI (auto)
+## 7. Construire les installeurs en local
+
+**Windows** (sur PC Windows avec Flutter + Inno Setup) :
+```powershell
+flutter build windows --release
+iscc packaging\windows\installer.iss /DAppVersion=1.3.0
+```
+
+**macOS** (sur Mac avec Flutter) :
+```bash
+flutter build macos --release
+brew install create-dmg
+create-dmg --volname "StockTout" --window-size 600 400 --icon-size 100 \
+  --icon "StockTout.app" 150 185 --app-drop-link 450 185 \
+  stocktout-macos.dmg build/macos/Build/Products/Release/StockTout.app
+```
+
+## 8. CI (auto)
 
 Le workflow `CI` tourne a chaque push : format, analyse, tests.
 Il ne publie rien, il verifie juste que le code est sain.

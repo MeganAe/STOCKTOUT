@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0 — 2026-10-19
+
+- Installeur Windows (Setup.exe, Inno Setup, sans admin, FR/EN).
+- Images disque macOS (DMG glisser-deposer) Intel + Silicon.
+- ZIP et archives conserves en plus.
+
 ## 1.2.0 — 2026-10-19
 
 - Identite visuelle : logo StockTout, icones Windows/macOS/Linux.

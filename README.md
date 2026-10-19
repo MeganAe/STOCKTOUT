@@ -22,12 +22,15 @@ Windows, macOS et Linux. Intel/AMD et ARM.
 
 Allez dans **Releases** sur GitHub et prenez le fichier pour votre systeme :
 
-| Systeme | Fichier |
-|---|---|
-| Windows x64 | `stocktout-windows-x64-VERSION.zip` |
-| macOS Intel | `stocktout-macos-x64-VERSION.zip` |
-| macOS Silicon | `stocktout-macos-arm64-VERSION.zip` |
-| Linux x64 | `stocktout-linux-x64-VERSION.tar.gz` |
+| Systeme | Format | Fichier |
+|---|---|---|
+| Windows | Installeur (recommande) | `stocktout-windows-x64-VERSION-setup.exe` |
+| Windows | Portable | `stocktout-windows-x64-VERSION.zip` |
+| macOS Intel | DMG (recommande) | `stocktout-macos-x64-VERSION.dmg` |
+| macOS Intel | ZIP | `stocktout-macos-x64-VERSION.zip` |
+| macOS Silicon | DMG (recommande) | `stocktout-macos-arm64-VERSION.dmg` |
+| macOS Silicon | ZIP | `stocktout-macos-arm64-VERSION.zip` |
+| Linux | Archive | `stocktout-linux-x64-VERSION.tar.gz` |
 
 > Non inclus pour l'instant : Windows ARM64 (le runner ARM n'a que
 > VS2026, non reconnu par Flutter 3.24) et Linux ARM64 (pas de SDK
@@ -55,9 +58,8 @@ Tout se fait depuis GitHub, sans rien installer :
 1. Poussez le code sur `main`.
 2. Onglet **Actions** > **Release** > **Run workflow**.
 3. Choisissez les plateformes, lancez.
-4. La release est publiee directement avec les 4 fichiers (ou en
-   brouillon si vous avez mis `draft: true` — a publier dans l'onglet
-   Releases).
+4. La release est publiee directement avec les 7 fichiers (setup,
+   DMG, ZIP, archive — ou en brouillon si `draft: true`).
 
 Detail : [docs/BUILD.md](docs/BUILD.md).
 
