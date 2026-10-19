@@ -6,12 +6,12 @@ compile tout seul, c'est vous qui decidez quand sortir une version.
 ## 1. Mettre le projet sur GitHub
 
 ```bash
-cd stockpro
+cd stocktout
 git init
 git add .
-git commit -m "StockPro 1.0.0"
+git commit -m "StockTout 1.0.0"
 git branch -M main
-git remote add origin https://github.com/VOTRE-COMPTE/stockpro.git
+git remote add origin https://github.com/VOTRE-COMPTE/stocktout.git
 git push -u origin main
 ```
 
@@ -22,18 +22,20 @@ git push -u origin main
 3. Remplissez :
    - `version` : ex `1.0.0` (vide = version de `pubspec.yaml`).
    - `platforms` : `all` pour tout compiler, ou une seule plateforme.
-   - `draft` : laissez `true` pour relire avant publication.
+   - `draft` : `false` = publie directement. Mettez `true` pour relire
+     la release en brouillon avant publication (onglet Releases > Draft).
 4. Lancez. Duree : ~15-30 min pour les 6 builds.
-5. Quand c'est vert, allez dans **Releases** : le brouillon contient les 6 fichiers.
+5. Quand c'est vert, allez dans **Releases** : les 4 fichiers y sont
+   (publies directement, sauf si `draft: true`).
 6. Relisez les notes, cliquez **Publish release**.
 
 ## 3. Ce qui est compile
 
 | Job | Runner | Sortie |
 |---|---|---|
-| windows-x64 | windows-2022 (epingle : VS2022) | ZIP avec `stockpro.exe` |
-| macos-x64 | macos-15-intel | ZIP avec `StockPro.app` |
-| macos-arm64 | macos-15 | ZIP avec `StockPro.app` |
+| windows-x64 | windows-2022 (epingle : VS2022) | ZIP avec `stocktout.exe` |
+| macos-x64 | macos-15-intel | ZIP avec `StockTout.app` |
+| macos-arm64 | macos-15 | ZIP avec `StockTout.app` |
 | linux-x64 | ubuntu-22.04 | tar.gz du bundle |
 
 Runners epingles volontairement, pas de `-latest` :
@@ -49,18 +51,18 @@ Les deux seront re-essayes apres montee de version Flutter.
 
 ## 4. Installer
 
-**Windows** : decompressez le ZIP, double-cliquez `stockpro.exe`.
+**Windows** : decompressez le ZIP, double-cliquez `stocktout.exe`.
 Si SmartScreen bloque : clic droit > Proprietes > debloquer, ou signez le binaire
 (voir section signature).
 
-**macOS** : decompressez, glissez `StockPro.app` dans Applications.
+**macOS** : decompressez, glissez `StockTout.app` dans Applications.
 Premier lancement : clic droit > Ouvrir > Ouvrir (bypass Gatekeeper pour les
 apps non signees).
 
 **Linux** :
 ```bash
-tar -xzf stockpro-linux-x64-1.0.0.tar.gz
-./stockpro/stockpro
+tar -xzf stocktout-linux-x64-1.0.0.tar.gz
+./stocktout/stocktout
 ```
 Note : installez `zenity` pour les dialogues de fichiers
 (`sudo apt install zenity` sur Ubuntu/Debian).

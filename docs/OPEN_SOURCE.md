@@ -1,6 +1,6 @@
 # Briques open source utilisees
 
-StockPro s'appuie sur des projets eprouves, pas de code exotique :
+StockTout s'appuie sur des projets eprouves, pas de code exotique :
 
 | Besoin | Projet | Licence |
 |---|---|---|

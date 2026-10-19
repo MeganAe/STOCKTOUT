@@ -33,9 +33,9 @@ on:
           - macos
           - linux
       draft:
-        description: "Creer la release en brouillon ?"
+        description: "Creer la release en brouillon ? (sinon publiee directement)"
         required: true
-        default: true
+        default: false
         type: boolean
       prerelease:
         description: "Marquer comme pre-release ?"
@@ -48,7 +48,7 @@ permissions:
 
 env:
   FLUTTER_VERSION: "3.24.3"
-  APP_NAME: stockpro
+  APP_NAME: stocktout
 
 jobs:
   resolve-version:
@@ -197,25 +197,25 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ needs.resolve-version.outputs.version }}
-          name: StockPro v${{ needs.resolve-version.outputs.version }}
+          name: StockTout v${{ needs.resolve-version.outputs.version }}
           draft: ${{ inputs.draft }}
           prerelease: ${{ inputs.prerelease }}
           files: dist/*
           body: |
-            ## StockPro v${{ needs.resolve-version.outputs.version }}
+            ## StockTout v${{ needs.resolve-version.outputs.version }}
 
             ### Telechargements
             | Systeme | Architecture | Fichier |
             |---|---|---|
-            | Windows | x64 | `stockpro-windows-x64-${{ needs.resolve-version.outputs.version }}.zip` |
-            | macOS | Intel | `stockpro-macos-x64-${{ needs.resolve-version.outputs.version }}.zip` |
-            | macOS | Silicon | `stockpro-macos-arm64-${{ needs.resolve-version.outputs.version }}.zip` |
-            | Linux | x64 | `stockpro-linux-x64-${{ needs.resolve-version.outputs.version }}.tar.gz` |
+            | Windows | x64 | `stocktout-windows-x64-${{ needs.resolve-version.outputs.version }}.zip` |
+            | macOS | Intel | `stocktout-macos-x64-${{ needs.resolve-version.outputs.version }}.zip` |
+            | macOS | Silicon | `stocktout-macos-arm64-${{ needs.resolve-version.outputs.version }}.zip` |
+            | Linux | x64 | `stocktout-linux-x64-${{ needs.resolve-version.outputs.version }}.tar.gz` |
 
             ### Installation
-            - **Windows** : decompressez le ZIP, lancez `stockpro.exe`.
-            - **macOS** : decompressez, glissez `StockPro.app` dans Applications. Au premier lancement, clic droit > Ouvrir.
-            - **Linux** : `tar -xzf stockpro-linux-*.tar.gz && ./stockpro/stockpro`
+            - **Windows** : decompressez le ZIP, lancez `stocktout.exe`.
+            - **macOS** : decompressez, glissez `StockTout.app` dans Applications. Au premier lancement, clic droit > Ouvrir.
+            - **Linux** : `tar -xzf stocktout-linux-*.tar.gz && ./stocktout/stocktout`
 
             > Builds produits automatiquement par le workflow manuel `Release`.
             > Non inclus : Windows ARM64 (VS2026 non reconnu par Flutter 3.24)

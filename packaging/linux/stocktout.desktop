@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=StockTout
+Comment=Logiciel de gestion de stock
+Exec=stocktout
+Icon=stocktout
+Terminal=false
+Categories=Office;Finance;
+StartupWMClass=stocktout

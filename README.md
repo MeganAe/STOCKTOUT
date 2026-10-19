@@ -1,4 +1,4 @@
-# StockPro
+# StockTout
 
 Logiciel de gestion de stock pour tout type de commerce : boutique, depot, pharmacie, quincaillerie, alimentation, PME.
 
@@ -24,10 +24,10 @@ Allez dans **Releases** sur GitHub et prenez le fichier pour votre systeme :
 
 | Systeme | Fichier |
 |---|---|
-| Windows x64 | `stockpro-windows-x64-VERSION.zip` |
-| macOS Intel | `stockpro-macos-x64-VERSION.zip` |
-| macOS Silicon | `stockpro-macos-arm64-VERSION.zip` |
-| Linux x64 | `stockpro-linux-x64-VERSION.tar.gz` |
+| Windows x64 | `stocktout-windows-x64-VERSION.zip` |
+| macOS Intel | `stocktout-macos-x64-VERSION.zip` |
+| macOS Silicon | `stocktout-macos-arm64-VERSION.zip` |
+| Linux x64 | `stocktout-linux-x64-VERSION.tar.gz` |
 
 > Non inclus pour l'instant : Windows ARM64 (le runner ARM n'a que
 > VS2026, non reconnu par Flutter 3.24) et Linux ARM64 (pas de SDK
@@ -55,7 +55,9 @@ Tout se fait depuis GitHub, sans rien installer :
 1. Poussez le code sur `main`.
 2. Onglet **Actions** > **Release** > **Run workflow**.
 3. Choisissez les plateformes, lancez.
-4. La release apparait en brouillon avec les 6 fichiers. Relisez, puis publiez.
+4. La release est publiee directement avec les 4 fichiers (ou en
+   brouillon si vous avez mis `draft: true` — a publier dans l'onglet
+   Releases).
 
 Detail : [docs/BUILD.md](docs/BUILD.md).
 
@@ -71,7 +73,7 @@ Detail : [docs/BUILD.md](docs/BUILD.md).
 ## Technique
 
 Flutter + Dart (Material 3), SQLite local, Riverpod.
-Module de calcul `packages/stockpro_engine` en pur Dart (testable partout).
+Module de calcul `packages/stocktout_engine` en pur Dart (testable partout).
 Scripts outillage en Python (`scripts/`).
 
 ## Licence

@@ -28,7 +28,7 @@ lib/
 
 ## Base de donnees
 
-Fichier : `<Documents>/stockpro/stockpro.db`
+Fichier : `<Documents>/stocktout/stocktout.db`
 
 Tables : `products`, `movements`, `sales`, `purchases`, `partners`,
 `currencies`, `automations`, `settings`.
@@ -36,11 +36,11 @@ Tables : `products`, `movements`, `sales`, `purchases`, `partners`,
 Les quantites sont recalculees a chaque mouvement dans `addMovement()`.
 Les ventes stockent leurs lignes en JSON (simple, suffisant a cette echelle).
 
-## Module `packages/stockpro_engine`
+## Module `packages/stocktout_engine`
 
 Logique de calcul pure Dart, sans Flutter : marges, valorisation, seuils,
 conversion de devises. Utilisable dans l'app, dans les tests, ou dans un futur
-service serveur. Voir `packages/stockpro_engine/`.
+service serveur. Voir `packages/stocktout_engine/`.
 
 ## Evolutions prevues
 

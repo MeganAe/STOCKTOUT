@@ -7,13 +7,13 @@ import 'package:path_provider/path_provider.dart';
 class BackupService {
   Future<String> get dbPath async {
     final dir = await getApplicationDocumentsDirectory();
-    return p.join(dir.path, 'stockpro', 'stockpro.db');
+    return p.join(dir.path, 'stocktout', 'stocktout.db');
   }
 
   Future<String> backup(String destDir) async {
     final src = File(await dbPath);
     final stamp = DateTime.now().toIso8601String().replaceAll(':', '-');
-    final dest = File(p.join(destDir, 'stockpro-$stamp.db'));
+    final dest = File(p.join(destDir, 'stocktout-$stamp.db'));
     await dest.writeAsBytes(await src.readAsBytes());
     return dest.path;
   }

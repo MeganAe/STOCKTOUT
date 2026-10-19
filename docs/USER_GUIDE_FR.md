@@ -1,4 +1,4 @@
-# Guide utilisateur — StockPro
+# Guide utilisateur — StockTout
 
 ## Demarrer
 
@@ -6,6 +6,10 @@
 2. Allez dans **Parametres** : choisissez votre langue et votre devise.
 3. Ajoutez vos produits dans **Produits** > **Nouveau produit**.
 4. Faites vos ventes dans **Ventes** (caisse).
+
+Au premier lancement, un tutoriel en 5 ecrans vous guide. Chargez les
+produits d'exemple pour explorer sans risque (dont un en stock bas,
+pour voir l'alerte). Rejouable dans **Parametres** > **Tutoriel**.
 
 ## Produits
 
@@ -64,7 +68,7 @@ Faites une sauvegarde par semaine, minimum.
 
 **Ca marche sans internet ?** Oui, tout est local.
 
-**Ou sont mes donnees ?** Dans `<Documents>/stockpro/stockpro.db`.
+**Ou sont mes donnees ?** Dans `<Documents>/stocktout/stocktout.db`.
 
 **Je change d'ordinateur ?** Sauvegardez, installez l'app sur le nouveau,
 restaurez le fichier.

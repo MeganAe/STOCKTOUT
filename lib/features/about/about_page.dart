@@ -30,12 +30,16 @@ class _AboutPageState extends State<AboutPage> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircleAvatar(
-              radius: 28,
-              child: Icon(Icons.inventory_2, size: 28),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: Image.asset(
+                'assets/images/logo.png',
+                width: 64,
+                height: 64,
+              ),
             ),
             const SizedBox(height: 12),
-            Text('StockPro',
+            Text('StockTout',
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.bold,
                     )),
@@ -52,8 +56,8 @@ class _AboutPageState extends State<AboutPage> {
             const Divider(),
             const SizedBox(height: 8),
             // ---- Auteur (uniquement ici) ----
-            const Text('Auteur : StockPro Team'),
-            const Text('Contact : voir le depot GitHub du projet.'),
+            const Text('Auteur : Metoushela Walker'),
+            const Text('GitHub : MeganAe/STOCKOUT'),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => Navigator.pop(context),

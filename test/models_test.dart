@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stockpro/core/models/currency.dart';
-import 'package:stockpro/core/models/product.dart';
+import 'package:stocktout/core/models/currency.dart';
+import 'package:stocktout/core/models/product.dart';
 
 void main() {
   test('stock bas detecte', () {

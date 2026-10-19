@@ -1,4 +1,4 @@
-# User guide — StockPro
+# User guide — StockTout
 
 ## Getting started
 
@@ -6,6 +6,10 @@
 2. Go to **Settings**: pick your language and currency.
 3. Add products in **Products** > **New product**.
 4. Sell in **Sales** (point of sale).
+
+On first launch, a 5-screen tutorial guides you. Load the sample
+products to explore safely (one is low on stock, to see the alert).
+Replayable in **Settings** > **Tutorial**.
 
 ## Products
 
@@ -63,7 +67,7 @@ Back up at least weekly.
 
 **Offline?** Yes, everything is local.
 
-**Where is my data?** In `<Documents>/stockpro/stockpro.db`.
+**Where is my data?** In `<Documents>/stocktout/stocktout.db`.
 
 **New computer?** Back up, install the app, restore the file.
 

@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.stockpro" "\0"
-            VALUE "FileDescription", "stockpro" "\0"
+            VALUE "CompanyName", "Metoushela Walker" "\0"
+            VALUE "FileDescription", "StockTout - Gestion de stock" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "stockpro" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.stockpro. All rights reserved." "\0"
-            VALUE "OriginalFilename", "stockpro.exe" "\0"
-            VALUE "ProductName", "stockpro" "\0"
+            VALUE "InternalName", "stocktout" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 Metoushela Walker. All rights reserved." "\0"
+            VALUE "OriginalFilename", "stocktout.exe" "\0"
+            VALUE "ProductName", "StockTout" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

@@ -7,15 +7,15 @@ import 'core/providers/app_providers.dart';
 import 'core/theme/app_theme.dart';
 import 'widgets/app_shell.dart';
 
-class StockProApp extends ConsumerWidget {
-  const StockProApp({super.key});
+class StockToutApp extends ConsumerWidget {
+  const StockToutApp({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final settings = ref.watch(settingsProvider);
 
     return MaterialApp(
-      title: 'StockPro',
+      title: 'StockTout',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),

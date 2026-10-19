@@ -17,12 +17,13 @@ Future<void> main() async {
     databaseFactory = databaseFactoryFfi;
 
     await windowManager.ensureInitialized();
+    await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
     await windowManager.waitUntilReadyToShow(
       const WindowOptions(
         size: Size(1280, 800),
         minimumSize: Size(1024, 640),
         center: true,
-        title: 'StockPro',
+        title: 'StockTout',
       ),
       () async {
         await windowManager.show();
@@ -33,5 +34,5 @@ Future<void> main() async {
 
   await AppDatabase.instance.init();
 
-  runApp(const ProviderScope(child: StockProApp()));
+  runApp(const ProviderScope(child: StockToutApp()));
 }

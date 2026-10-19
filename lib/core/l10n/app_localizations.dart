@@ -997,6 +997,721 @@ class AppLocalizations {
       'ln': 'Kanga',
       'uk': 'Закрити'
     },
+    'obSkip': {
+      'en': 'Skip',
+      'fr': 'Passer',
+      'es': 'Skip',
+      'de': 'Skip',
+      'it': 'Skip',
+      'pt': 'Skip',
+      'nl': 'Skip',
+      'ru': 'Skip',
+      'zh': 'Skip',
+      'ja': 'Skip',
+      'ko': 'Skip',
+      'ar': 'Skip',
+      'hi': 'Skip',
+      'tr': 'Skip',
+      'pl': 'Skip',
+      'sv': 'Skip',
+      'da': 'Skip',
+      'no': 'Skip',
+      'fi': 'Skip',
+      'el': 'Skip',
+      'cs': 'Skip',
+      'ro': 'Skip',
+      'hu': 'Skip',
+      'id': 'Skip',
+      'sw': 'Skip',
+      'ln': 'Skip',
+      'uk': 'Skip'
+    },
+    'obNext': {
+      'en': 'Next',
+      'fr': 'Suivant',
+      'es': 'Next',
+      'de': 'Next',
+      'it': 'Next',
+      'pt': 'Next',
+      'nl': 'Next',
+      'ru': 'Next',
+      'zh': 'Next',
+      'ja': 'Next',
+      'ko': 'Next',
+      'ar': 'Next',
+      'hi': 'Next',
+      'tr': 'Next',
+      'pl': 'Next',
+      'sv': 'Next',
+      'da': 'Next',
+      'no': 'Next',
+      'fi': 'Next',
+      'el': 'Next',
+      'cs': 'Next',
+      'ro': 'Next',
+      'hu': 'Next',
+      'id': 'Next',
+      'sw': 'Next',
+      'ln': 'Next',
+      'uk': 'Next'
+    },
+    'obStart': {
+      'en': 'Get started',
+      'fr': 'Commencer',
+      'es': 'Get started',
+      'de': 'Get started',
+      'it': 'Get started',
+      'pt': 'Get started',
+      'nl': 'Get started',
+      'ru': 'Get started',
+      'zh': 'Get started',
+      'ja': 'Get started',
+      'ko': 'Get started',
+      'ar': 'Get started',
+      'hi': 'Get started',
+      'tr': 'Get started',
+      'pl': 'Get started',
+      'sv': 'Get started',
+      'da': 'Get started',
+      'no': 'Get started',
+      'fi': 'Get started',
+      'el': 'Get started',
+      'cs': 'Get started',
+      'ro': 'Get started',
+      'hu': 'Get started',
+      'id': 'Get started',
+      'sw': 'Get started',
+      'ln': 'Get started',
+      'uk': 'Get started'
+    },
+    'obDemo': {
+      'en': 'Load sample data',
+      'fr': 'Charger des exemples',
+      'es': 'Load sample data',
+      'de': 'Load sample data',
+      'it': 'Load sample data',
+      'pt': 'Load sample data',
+      'nl': 'Load sample data',
+      'ru': 'Load sample data',
+      'zh': 'Load sample data',
+      'ja': 'Load sample data',
+      'ko': 'Load sample data',
+      'ar': 'Load sample data',
+      'hi': 'Load sample data',
+      'tr': 'Load sample data',
+      'pl': 'Load sample data',
+      'sv': 'Load sample data',
+      'da': 'Load sample data',
+      'no': 'Load sample data',
+      'fi': 'Load sample data',
+      'el': 'Load sample data',
+      'cs': 'Load sample data',
+      'ro': 'Load sample data',
+      'hu': 'Load sample data',
+      'id': 'Load sample data',
+      'sw': 'Load sample data',
+      'ln': 'Load sample data',
+      'uk': 'Load sample data'
+    },
+    'obDemoDone': {
+      'en': 'Sample products added.',
+      'fr': 'Produits d\'exemple ajoutes.',
+      'es': 'Sample products added.',
+      'de': 'Sample products added.',
+      'it': 'Sample products added.',
+      'pt': 'Sample products added.',
+      'nl': 'Sample products added.',
+      'ru': 'Sample products added.',
+      'zh': 'Sample products added.',
+      'ja': 'Sample products added.',
+      'ko': 'Sample products added.',
+      'ar': 'Sample products added.',
+      'hi': 'Sample products added.',
+      'tr': 'Sample products added.',
+      'pl': 'Sample products added.',
+      'sv': 'Sample products added.',
+      'da': 'Sample products added.',
+      'no': 'Sample products added.',
+      'fi': 'Sample products added.',
+      'el': 'Sample products added.',
+      'cs': 'Sample products added.',
+      'ro': 'Sample products added.',
+      'hu': 'Sample products added.',
+      'id': 'Sample products added.',
+      'sw': 'Sample products added.',
+      'ln': 'Sample products added.',
+      'uk': 'Sample products added.'
+    },
+    'obDemoExists': {
+      'en': 'Products already exist.',
+      'fr': 'Des produits existent deja.',
+      'es': 'Products already exist.',
+      'de': 'Products already exist.',
+      'it': 'Products already exist.',
+      'pt': 'Products already exist.',
+      'nl': 'Products already exist.',
+      'ru': 'Products already exist.',
+      'zh': 'Products already exist.',
+      'ja': 'Products already exist.',
+      'ko': 'Products already exist.',
+      'ar': 'Products already exist.',
+      'hi': 'Products already exist.',
+      'tr': 'Products already exist.',
+      'pl': 'Products already exist.',
+      'sv': 'Products already exist.',
+      'da': 'Products already exist.',
+      'no': 'Products already exist.',
+      'fi': 'Products already exist.',
+      'el': 'Products already exist.',
+      'cs': 'Products already exist.',
+      'ro': 'Products already exist.',
+      'hu': 'Products already exist.',
+      'id': 'Products already exist.',
+      'sw': 'Products already exist.',
+      'ln': 'Products already exist.',
+      'uk': 'Products already exist.'
+    },
+    'obT1': {
+      'en': 'Welcome to StockTout',
+      'fr': 'Bienvenue sur StockTout',
+      'es': 'Welcome to StockTout',
+      'de': 'Welcome to StockTout',
+      'it': 'Welcome to StockTout',
+      'pt': 'Welcome to StockTout',
+      'nl': 'Welcome to StockTout',
+      'ru': 'Welcome to StockTout',
+      'zh': 'Welcome to StockTout',
+      'ja': 'Welcome to StockTout',
+      'ko': 'Welcome to StockTout',
+      'ar': 'Welcome to StockTout',
+      'hi': 'Welcome to StockTout',
+      'tr': 'Welcome to StockTout',
+      'pl': 'Welcome to StockTout',
+      'sv': 'Welcome to StockTout',
+      'da': 'Welcome to StockTout',
+      'no': 'Welcome to StockTout',
+      'fi': 'Welcome to StockTout',
+      'el': 'Welcome to StockTout',
+      'cs': 'Welcome to StockTout',
+      'ro': 'Welcome to StockTout',
+      'hu': 'Welcome to StockTout',
+      'id': 'Welcome to StockTout',
+      'sw': 'Welcome to StockTout',
+      'ln': 'Welcome to StockTout',
+      'uk': 'Welcome to StockTout'
+    },
+    'obB1': {
+      'en':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'fr':
+          'Votre stock, vos ventes et vos fournisseurs dans une seule app. Fonctionne hors-ligne, vos donnees restent sur votre machine.',
+      'es':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'de':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'it':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'pt':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'nl':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'ru':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'zh':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'ja':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'ko':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'ar':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'hi':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'tr':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'pl':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'sv':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'da':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'no':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'fi':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'el':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'cs':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'ro':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'hu':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'id':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'sw':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'ln':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.',
+      'uk':
+          'Your stock, sales and suppliers in one app. Works offline, your data stays on your machine.'
+    },
+    'obT2': {
+      'en': 'A day at the shop',
+      'fr': 'Une journee a la boutique',
+      'es': 'A day at the shop',
+      'de': 'A day at the shop',
+      'it': 'A day at the shop',
+      'pt': 'A day at the shop',
+      'nl': 'A day at the shop',
+      'ru': 'A day at the shop',
+      'zh': 'A day at the shop',
+      'ja': 'A day at the shop',
+      'ko': 'A day at the shop',
+      'ar': 'A day at the shop',
+      'hi': 'A day at the shop',
+      'tr': 'A day at the shop',
+      'pl': 'A day at the shop',
+      'sv': 'A day at the shop',
+      'da': 'A day at the shop',
+      'no': 'A day at the shop',
+      'fi': 'A day at the shop',
+      'el': 'A day at the shop',
+      'cs': 'A day at the shop',
+      'ro': 'A day at the shop',
+      'hu': 'A day at the shop',
+      'id': 'A day at the shop',
+      'sw': 'A day at the shop',
+      'ln': 'A day at the shop',
+      'uk': 'A day at the shop'
+    },
+    'obB2': {
+      'en':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'fr':
+          'Matin : controlez le stock bas. Journee : vendez en caisse. Soir : lisez le rapport. Trois gestes, chaque jour.',
+      'es':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'de':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'it':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'pt':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'nl':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'ru':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'zh':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'ja':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'ko':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'ar':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'hi':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'tr':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'pl':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'sv':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'da':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'no':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'fi':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'el':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'cs':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'ro':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'hu':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'id':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'sw':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'ln':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.',
+      'uk':
+          'Morning: check low stock. Day: sell at the till. Evening: read the report. Three steps, every day.'
+    },
+    'obT3': {
+      'en': 'The till',
+      'fr': 'La caisse',
+      'es': 'The till',
+      'de': 'The till',
+      'it': 'The till',
+      'pt': 'The till',
+      'nl': 'The till',
+      'ru': 'The till',
+      'zh': 'The till',
+      'ja': 'The till',
+      'ko': 'The till',
+      'ar': 'The till',
+      'hi': 'The till',
+      'tr': 'The till',
+      'pl': 'The till',
+      'sv': 'The till',
+      'da': 'The till',
+      'no': 'The till',
+      'fi': 'The till',
+      'el': 'The till',
+      'cs': 'The till',
+      'ro': 'The till',
+      'hu': 'The till',
+      'id': 'The till',
+      'sw': 'The till',
+      'ln': 'The till',
+      'uk': 'The till'
+    },
+    'obB3': {
+      'en':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'fr':
+          'Cliquez les produits pour remplir le panier, choisissez le paiement, encaissez. Le stock se met a jour tout seul.',
+      'es':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'de':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'it':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'pt':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'nl':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'ru':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'zh':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'ja':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'ko':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'ar':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'hi':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'tr':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'pl':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'sv':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'da':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'no':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'fi':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'el':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'cs':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'ro':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'hu':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'id':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'sw':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'ln':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.',
+      'uk':
+          'Click products to fill the cart, pick a payment method, checkout. Stock updates itself.'
+    },
+    'obT4': {
+      'en': 'Never run out',
+      'fr': 'Plus de rupture',
+      'es': 'Never run out',
+      'de': 'Never run out',
+      'it': 'Never run out',
+      'pt': 'Never run out',
+      'nl': 'Never run out',
+      'ru': 'Never run out',
+      'zh': 'Never run out',
+      'ja': 'Never run out',
+      'ko': 'Never run out',
+      'ar': 'Never run out',
+      'hi': 'Never run out',
+      'tr': 'Never run out',
+      'pl': 'Never run out',
+      'sv': 'Never run out',
+      'da': 'Never run out',
+      'no': 'Never run out',
+      'fi': 'Never run out',
+      'el': 'Never run out',
+      'cs': 'Never run out',
+      'ro': 'Never run out',
+      'hu': 'Never run out',
+      'id': 'Never run out',
+      'sw': 'Never run out',
+      'ln': 'Never run out',
+      'uk': 'Never run out'
+    },
+    'obB4': {
+      'en':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'fr':
+          'Fixez un seuil par produit. StockTout vous previent, et peut preparer la commande fournisseur.',
+      'es':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'de':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'it':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'pt':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'nl':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'ru':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'zh':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'ja':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'ko':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'ar':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'hi':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'tr':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'pl':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'sv':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'da':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'no':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'fi':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'el':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'cs':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'ro':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'hu':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'id':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'sw':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'ln':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.',
+      'uk':
+          'Set a minimum per product. StockTout warns you, and can draft the supplier order.'
+    },
+    'obT5': {
+      'en': 'Your turn',
+      'fr': 'A vous !',
+      'es': 'Your turn',
+      'de': 'Your turn',
+      'it': 'Your turn',
+      'pt': 'Your turn',
+      'nl': 'Your turn',
+      'ru': 'Your turn',
+      'zh': 'Your turn',
+      'ja': 'Your turn',
+      'ko': 'Your turn',
+      'ar': 'Your turn',
+      'hi': 'Your turn',
+      'tr': 'Your turn',
+      'pl': 'Your turn',
+      'sv': 'Your turn',
+      'da': 'Your turn',
+      'no': 'Your turn',
+      'fi': 'Your turn',
+      'el': 'Your turn',
+      'cs': 'Your turn',
+      'ro': 'Your turn',
+      'hu': 'Your turn',
+      'id': 'Your turn',
+      'sw': 'Your turn',
+      'ln': 'Your turn',
+      'uk': 'Your turn'
+    },
+    'obB5': {
+      'en':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'fr':
+          'Ajoutez votre premier produit, ou explorez avec des exemples. Rejouez ce tour dans Parametres.',
+      'es':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'de':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'it':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'pt':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'nl':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'ru':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'zh':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'ja':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'ko':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'ar':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'hi':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'tr':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'pl':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'sv':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'da':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'no':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'fi':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'el':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'cs':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'ro':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'hu':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'id':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'sw':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'ln':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.',
+      'uk':
+          'Add your first product, or explore with sample data. Replay this tour anytime in Settings.'
+    },
+    'tutorial': {
+      'en': 'Tutorial',
+      'fr': 'Tutoriel',
+      'es': 'Tutorial',
+      'de': 'Tutorial',
+      'it': 'Tutorial',
+      'pt': 'Tutorial',
+      'nl': 'Tutorial',
+      'ru': 'Tutorial',
+      'zh': 'Tutorial',
+      'ja': 'Tutorial',
+      'ko': 'Tutorial',
+      'ar': 'Tutorial',
+      'hi': 'Tutorial',
+      'tr': 'Tutorial',
+      'pl': 'Tutorial',
+      'sv': 'Tutorial',
+      'da': 'Tutorial',
+      'no': 'Tutorial',
+      'fi': 'Tutorial',
+      'el': 'Tutorial',
+      'cs': 'Tutorial',
+      'ro': 'Tutorial',
+      'hu': 'Tutorial',
+      'id': 'Tutorial',
+      'sw': 'Tutorial',
+      'ln': 'Tutorial',
+      'uk': 'Tutorial'
+    },
+    'replayTutorial': {
+      'en': 'Replay the tutorial',
+      'fr': 'Revoir le tutoriel',
+      'es': 'Replay the tutorial',
+      'de': 'Replay the tutorial',
+      'it': 'Replay the tutorial',
+      'pt': 'Replay the tutorial',
+      'nl': 'Replay the tutorial',
+      'ru': 'Replay the tutorial',
+      'zh': 'Replay the tutorial',
+      'ja': 'Replay the tutorial',
+      'ko': 'Replay the tutorial',
+      'ar': 'Replay the tutorial',
+      'hi': 'Replay the tutorial',
+      'tr': 'Replay the tutorial',
+      'pl': 'Replay the tutorial',
+      'sv': 'Replay the tutorial',
+      'da': 'Replay the tutorial',
+      'no': 'Replay the tutorial',
+      'fi': 'Replay the tutorial',
+      'el': 'Replay the tutorial',
+      'cs': 'Replay the tutorial',
+      'ro': 'Replay the tutorial',
+      'hu': 'Replay the tutorial',
+      'id': 'Replay the tutorial',
+      'sw': 'Replay the tutorial',
+      'ln': 'Replay the tutorial',
+      'uk': 'Replay the tutorial'
+    },
+    'menuExpand': {
+      'en': 'Show menu',
+      'fr': 'Afficher le menu',
+      'es': 'Show menu',
+      'de': 'Show menu',
+      'it': 'Show menu',
+      'pt': 'Show menu',
+      'nl': 'Show menu',
+      'ru': 'Show menu',
+      'zh': 'Show menu',
+      'ja': 'Show menu',
+      'ko': 'Show menu',
+      'ar': 'Show menu',
+      'hi': 'Show menu',
+      'tr': 'Show menu',
+      'pl': 'Show menu',
+      'sv': 'Show menu',
+      'da': 'Show menu',
+      'no': 'Show menu',
+      'fi': 'Show menu',
+      'el': 'Show menu',
+      'cs': 'Show menu',
+      'ro': 'Show menu',
+      'hu': 'Show menu',
+      'id': 'Show menu',
+      'sw': 'Show menu',
+      'ln': 'Show menu',
+      'uk': 'Show menu'
+    },
+    'menuCollapse': {
+      'en': 'Hide menu',
+      'fr': 'Masquer le menu',
+      'es': 'Hide menu',
+      'de': 'Hide menu',
+      'it': 'Hide menu',
+      'pt': 'Hide menu',
+      'nl': 'Hide menu',
+      'ru': 'Hide menu',
+      'zh': 'Hide menu',
+      'ja': 'Hide menu',
+      'ko': 'Hide menu',
+      'ar': 'Hide menu',
+      'hi': 'Hide menu',
+      'tr': 'Hide menu',
+      'pl': 'Hide menu',
+      'sv': 'Hide menu',
+      'da': 'Hide menu',
+      'no': 'Hide menu',
+      'fi': 'Hide menu',
+      'el': 'Hide menu',
+      'cs': 'Hide menu',
+      'ro': 'Hide menu',
+      'hu': 'Hide menu',
+      'id': 'Hide menu',
+      'sw': 'Hide menu',
+      'ln': 'Hide menu',
+      'uk': 'Hide menu'
+    },
   };
 
   String _t(String key) =>
@@ -1035,6 +1750,26 @@ class AppLocalizations {
   String get currency => _t('currency');
   String get theme => _t('theme');
   String get close => _t('close');
+  String get obSkip => _t('obSkip');
+  String get obNext => _t('obNext');
+  String get obStart => _t('obStart');
+  String get obDemo => _t('obDemo');
+  String get obDemoDone => _t('obDemoDone');
+  String get obDemoExists => _t('obDemoExists');
+  String get obT1 => _t('obT1');
+  String get obB1 => _t('obB1');
+  String get obT2 => _t('obT2');
+  String get obB2 => _t('obB2');
+  String get obT3 => _t('obT3');
+  String get obB3 => _t('obB3');
+  String get obT4 => _t('obT4');
+  String get obB4 => _t('obB4');
+  String get obT5 => _t('obT5');
+  String get obB5 => _t('obB5');
+  String get tutorial => _t('tutorial');
+  String get replayTutorial => _t('replayTutorial');
+  String get menuExpand => _t('menuExpand');
+  String get menuCollapse => _t('menuCollapse');
 }
 
 class AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -1,5 +1,22 @@
 # Changelog
 
+## 1.2.0 — 2026-10-19
+
+- Identite visuelle : logo StockTout, icones Windows/macOS/Linux.
+- Menu lateral pliable (icones seules / icones + textes), memorise.
+- Tutoriel de premier lancement (5 ecrans) + produits d'exemple.
+- A propos : logo + auteur.
+
+## 1.1.0 — 2026-10-19
+
+- Renommage : StockPro devient StockTout (app, binaires, paquet).
+- Barre de titre integree facon apps modernes (glisser, double-clic,
+  boutons Windows/Linux, feux macOS conserves).
+- A propos : auteur Metoushela Walker.
+- Release : publication directe par defaut (draft en option).
+- Note : nouveau fichier de donnees stocktout.db (pas de migration
+  de l'ancien stockpro.db).
+
 ## 1.0.4 — 2026-10-19
 
 - Fix workflow invalide : `publish` ne depend plus du job supprime.

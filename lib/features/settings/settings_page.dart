@@ -7,6 +7,8 @@ import '../../core/l10n/app_localizations.dart';
 import '../../core/models/currency.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/services/backup_service.dart';
+import '../../core/services/demo_seeder.dart';
+import '../onboarding/onboarding_page.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -200,6 +202,53 @@ class SettingsPage extends ConsumerWidget {
                         icon: const Icon(Icons.restore),
                         label: const Text('Restaurer'),
                         onPressed: () => _restore(context),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          // Aide
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(t.tutorial,
+                      style: Theme.of(context).textTheme.titleMedium),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      FilledButton.tonalIcon(
+                        icon: const Icon(Icons.school_outlined),
+                        label: Text(t.replayTutorial),
+                        onPressed: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => OnboardingPage(
+                              onDone: () => Navigator.pop(context),
+                            ),
+                          ),
+                        ),
+                      ),
+                      OutlinedButton.icon(
+                        icon: const Icon(Icons.science_outlined),
+                        label: Text(t.obDemo),
+                        onPressed: () async {
+                          final n = await DemoSeeder.seedIfEmpty();
+                          if (!context.mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content:
+                                  Text(n > 0 ? t.obDemoDone : t.obDemoExists),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),

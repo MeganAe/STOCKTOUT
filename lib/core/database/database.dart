@@ -10,7 +10,7 @@ import '../models/product.dart';
 import '../models/stock_movement.dart';
 
 /// Base SQLite locale. Aucun serveur requis.
-/// Fichier : <documents>/stockpro/stockpro.db
+/// Fichier : <documents>/stocktout/stocktout.db
 class AppDatabase {
   AppDatabase._();
   static final AppDatabase instance = AppDatabase._();
@@ -20,7 +20,7 @@ class AppDatabase {
 
   Future<void> init() async {
     final dir = await getApplicationDocumentsDirectory();
-    final path = p.join(dir.path, 'stockpro', 'stockpro.db');
+    final path = p.join(dir.path, 'stocktout', 'stocktout.db');
     _db = await databaseFactory.openDatabase(
       path,
       options: OpenDatabaseOptions(
