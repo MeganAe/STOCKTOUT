@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.3 — 2026-10-18
+
+- Fix windows-x64 : runner epingle windows-2022 (VS2026 non reconnu).
+- Fix macos-x64 : macos-13 retire -> macos-15-intel.
+- Fix macos-arm64 : macos-14 -> macos-15 (retrait nov. 2026).
+- Fix linux-x64 : deps natives inutilisees retirees (tray_manager...).
+- Retrait windows-arm64 (VS2026 uniquement sur ce runner).
+
 ## 1.0.2 — 2026-10-18
 
 - Fix Release : vrais dossiers natifs windows/macos/linux (flutter create).

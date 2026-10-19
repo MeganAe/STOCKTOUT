@@ -6,7 +6,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   printing
   screen_retriever
   share_plus
-  tray_manager
   url_launcher_windows
   window_manager
 )

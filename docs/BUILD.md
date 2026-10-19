@@ -57,6 +57,8 @@ apps non signees).
 tar -xzf stockpro-linux-x64-1.0.0.tar.gz
 ./stockpro/stockpro
 ```
+Note : installez `zenity` pour les dialogues de fichiers
+(`sudo apt install zenity` sur Ubuntu/Debian).
 
 ## 5. Versions suivantes
 

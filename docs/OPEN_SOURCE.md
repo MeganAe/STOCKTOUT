@@ -12,8 +12,7 @@ StockPro s'appuie sur des projets eprouves, pas de code exotique :
 | Export PDF | pdf / printing | Apache-2.0 |
 | Export Excel | excel | MIT |
 | Fichiers | file_picker, path_provider, path | MIT / BSD |
-| Fenetre desktop | window_manager, tray_manager | MIT |
-| Lancement auto | launch_at_startup | MIT |
+| Fenetre desktop | window_manager | MIT |
 | Infos version | package_info_plus | BSD-3 |
 | Partage | share_plus | BSD-3 |
 | IDs | uuid | MIT |

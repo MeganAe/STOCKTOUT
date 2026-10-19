@@ -70,7 +70,10 @@ jobs:
   windows-x64:
     if: inputs.platforms == 'all' || inputs.platforms == 'windows'
     needs: resolve-version
-    runs-on: windows-latest
+    # windows-2022 et non windows-latest : le -latest (Server 2025 + VS2026)
+    # n'est pas reconnu par Flutter 3.24 ("could not find any instance
+    # of Visual Studio"). windows-2022 = VS2022, combo eprouve.
+    runs-on: windows-2022
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -90,32 +93,6 @@ jobs:
         with:
           name: windows-x64
           path: ${{ env.APP_NAME }}-windows-x64-*.zip
-
-  windows-arm64:
-    # Le SDK Flutter Windows n'existe qu'en x64 : il tourne emule sur le
-    # runner ARM64, mais `flutter build windows` produit bien des binaires
-    # ARM64 natifs (supporte depuis Flutter 3.22). Donc : pas de `architecture:`.
-    if: inputs.platforms == 'all' || inputs.platforms == 'windows'
-    needs: resolve-version
-    runs-on: windows-11-arm
-    steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          channel: stable
-      - run: flutter config --enable-windows-desktop
-      - run: flutter pub get
-      - run: flutter build windows --release
-      - name: Package ZIP (arm64)
-        shell: pwsh
-        run: |
-          $ver = "${{ needs.resolve-version.outputs.version }}"
-          Compress-Archive -Path build/windows/arm64/runner/Release/* -DestinationPath "${{ env.APP_NAME }}-windows-arm64-$ver.zip"
-      - uses: actions/upload-artifact@v4
-        with:
-          name: windows-arm64
-          path: ${{ env.APP_NAME }}-windows-arm64-*.zip
 
   # ---------------- macOS ----------------
   macos-x64:
@@ -237,4 +214,5 @@ jobs:
             - **Linux** : `tar -xzf stockpro-linux-*.tar.gz && ./stockpro/stockpro`
 
             > Builds produits automatiquement par le workflow manuel `Release`.
-            > Linux ARM64 non inclus : Flutter ne publie pas de SDK Linux ARM64.
+            > Non inclus : Windows ARM64 (VS2026 non reconnu par Flutter 3.24)
+            > et Linux ARM64 (pas de SDK officiel).
