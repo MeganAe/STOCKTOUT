@@ -31,16 +31,21 @@ git push -u origin main
 
 | Job | Runner | Sortie |
 |---|---|---|
-| windows-x64 | windows-latest | ZIP avec `stockpro.exe` |
-| windows-arm64 | windows-11-arm | ZIP avec `stockpro.exe` |
-| macos-x64 | macos-13 (Intel) | ZIP avec `StockPro.app` |
-| macos-arm64 | macos-14 (Silicon) | ZIP avec `StockPro.app` |
+| windows-x64 | windows-2022 (epingle : VS2022) | ZIP avec `stockpro.exe` |
+| macos-x64 | macos-15-intel | ZIP avec `StockPro.app` |
+| macos-arm64 | macos-15 | ZIP avec `StockPro.app` |
 | linux-x64 | ubuntu-22.04 | tar.gz du bundle |
 
-Pas de job `linux-arm64` : Flutter ne publie officiellement que des SDK
-Linux x64 (verifie sur les manifests de release, methode `dart_sdk_arch`).
-Le jour ou un SDK Linux ARM64 sort, dupliquer le job `linux-x64` avec
-`runs-on: ubuntu-22.04-arm`.
+Runners epingles volontairement, pas de `-latest` :
+- `windows-2022` : `windows-latest` est passe a VS2026, que Flutter 3.24
+  ne detecte pas (`could not find any instance of Visual Studio`).
+- `macos-15-intel` : `macos-13` est retire par GitHub. Dernier runner
+  Intel, dispo jusqu'aout 2027.
+- `macos-15` : `macos-14` est retire le 2 nov. 2026.
+
+Pas de job `windows-arm64` : le runner `windows-11-arm` n'a que VS2026.
+Pas de job `linux-arm64` : Flutter ne publie que des SDK Linux x64.
+Les deux seront re-essayes apres montee de version Flutter.
 
 ## 4. Installer
 

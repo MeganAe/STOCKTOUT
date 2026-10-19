@@ -25,7 +25,6 @@ Allez dans **Releases** sur GitHub et prenez le fichier pour votre systeme :
 | Systeme | Fichier |
 |---|---|
 | Windows x64 | `stockpro-windows-x64-VERSION.zip` |
-| Windows ARM | `stockpro-windows-arm64-VERSION.zip` |
 | macOS Intel | `stockpro-macos-x64-VERSION.zip` |
 | macOS Silicon | `stockpro-macos-arm64-VERSION.zip` |
 | Linux x64 | `stockpro-linux-x64-VERSION.tar.gz` |

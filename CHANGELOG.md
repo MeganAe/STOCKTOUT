@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4 — 2026-10-19
+
+- Fix workflow invalide : `publish` ne depend plus du job supprime.
+- Workflow Release re-ecrit au propre (4 builds : win-x64, mac-x64,
+  mac-arm64, linux-x64, runners epingles).
+
 ## 1.0.3 — 2026-10-18
 
 - Fix windows-x64 : runner epingle windows-2022 (VS2026 non reconnu).

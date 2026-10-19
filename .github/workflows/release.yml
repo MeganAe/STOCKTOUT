@@ -4,19 +4,21 @@ name: Release
 # Lancement : onglet Actions > Release > Run workflow.
 #
 # Produit :
-#  - Windows x64 + ARM64 (.zip)
+#  - Windows x64 (.zip)
 #  - macOS Intel (x64) + Silicon (arm64) (.zip avec .app)
 #  - Linux x64 (.tar.gz)
 #
-# Note : pas de Linux ARM64, Flutter ne publie pas de SDK Linux ARM64
-# (voir docs/BUILD.md). Des que ca existe, rajouter le job linux-arm64
-# sur le modele de linux-x64 avec runs-on: ubuntu-22.04-arm.
+# Non inclus (documente dans docs/BUILD.md) :
+#  - Windows ARM64 : le runner windows-11-arm n'a que Visual Studio 2026,
+#    que Flutter 3.24 ne sait pas utiliser. A re-essayer apres montee
+#    de version Flutter (le SDK x64 suffit, le build ARM64 est natif).
+#  - Linux ARM64 : Flutter ne publie pas de SDK Linux ARM64.
 
 on:
   workflow_dispatch:
     inputs:
       version:
-        description: "Version (ex: 1.0.2). Laisse vide pour utiliser pubspec.yaml"
+        description: "Version (ex: 1.0.4). Laisse vide pour utiliser pubspec.yaml"
         required: false
         default: ""
         type: string
@@ -98,7 +100,9 @@ jobs:
   macos-x64:
     if: inputs.platforms == 'all' || inputs.platforms == 'macos'
     needs: resolve-version
-    runs-on: macos-13
+    # macos-13 est retire par GitHub. macos-15-intel = dernier runner
+    # Intel, dispo jusqu'aout 2027.
+    runs-on: macos-15-intel
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -122,7 +126,9 @@ jobs:
   macos-arm64:
     if: inputs.platforms == 'all' || inputs.platforms == 'macos'
     needs: resolve-version
-    runs-on: macos-14
+    # macos-14 retire le 2 nov. 2026. macos-15 = meme generation Xcode,
+    # compatible Flutter 3.24.
+    runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
@@ -176,7 +182,6 @@ jobs:
     needs:
       - resolve-version
       - windows-x64
-      - windows-arm64
       - macos-x64
       - macos-arm64
       - linux-x64
@@ -203,7 +208,6 @@ jobs:
             | Systeme | Architecture | Fichier |
             |---|---|---|
             | Windows | x64 | `stockpro-windows-x64-${{ needs.resolve-version.outputs.version }}.zip` |
-            | Windows | ARM64 | `stockpro-windows-arm64-${{ needs.resolve-version.outputs.version }}.zip` |
             | macOS | Intel | `stockpro-macos-x64-${{ needs.resolve-version.outputs.version }}.zip` |
             | macOS | Silicon | `stockpro-macos-arm64-${{ needs.resolve-version.outputs.version }}.zip` |
             | Linux | x64 | `stockpro-linux-x64-${{ needs.resolve-version.outputs.version }}.tar.gz` |
