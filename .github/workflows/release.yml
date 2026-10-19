@@ -100,6 +100,7 @@ jobs:
             $env:Path += ";${env:ProgramFiles(x86)}\Inno Setup 6"
           }
           iscc "packaging/windows/installer.iss" /DAppVersion=$ver
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           Get-Item "${{ env.APP_NAME }}-windows-x64-$ver-setup.exe"
       - uses: actions/upload-artifact@v4
         with:
@@ -210,10 +211,43 @@ jobs:
         run: |
           VER="${{ needs.resolve-version.outputs.version }}"
           tar -czvf ${{ env.APP_NAME }}-linux-x64-$VER.tar.gz -C build/linux/x64/release bundle
+      - name: Build .deb (Ubuntu/Debian)
+        run: |
+          VER="${{ needs.resolve-version.outputs.version }}"
+          PKG=pkgdeb
+          rm -rf $PKG
+          mkdir -p $PKG/DEBIAN $PKG/usr/lib/stocktout $PKG/usr/bin \
+            $PKG/usr/share/applications \
+            $PKG/usr/share/icons/hicolor/48x48/apps \
+            $PKG/usr/share/icons/hicolor/64x64/apps \
+            $PKG/usr/share/icons/hicolor/128x128/apps \
+            $PKG/usr/share/icons/hicolor/256x256/apps \
+            $PKG/usr/share/icons/hicolor/512x512/apps
+          cp -r build/linux/x64/release/bundle/* $PKG/usr/lib/stocktout/
+          ln -s /usr/lib/stocktout/stocktout $PKG/usr/bin/stocktout
+          cp packaging/linux/stocktout.desktop $PKG/usr/share/applications/
+          for s in 48 64 128 256 512; do
+            cp assets/icons/png/appicon_$s.png \
+              $PKG/usr/share/icons/hicolor/${s}x${s}/apps/stocktout.png
+          done
+          cat > $PKG/DEBIAN/control <<EOF
+          Package: stocktout
+          Version: $VER
+          Section: office
+          Priority: optional
+          Architecture: amd64
+          Maintainer: Metoushela Walker
+          Depends: libgtk-3-0, libblkid1, liblzma5, libsqlite3-0
+          Recommends: zenity
+          Description: Logiciel de gestion de stock
+           StockTout : produits, stock, caisse, achats, rapports. Hors-ligne.
+          EOF
+          dpkg-deb --build $PKG ${{ env.APP_NAME }}-linux-x64-$VER-amd64.deb
+          ls -lh *.deb
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64
-          path: ${{ env.APP_NAME }}-linux-x64-*.tar.gz
+          path: ${{ env.APP_NAME }}-linux-x64-*
 
   # ---------------- PUBLICATION ----------------
   publish:
@@ -252,11 +286,12 @@ jobs:
             | macOS Silicon | DMG (recommande) | `stocktout-macos-arm64-${{ needs.resolve-version.outputs.version }}.dmg` |
             | macOS Silicon | ZIP | `stocktout-macos-arm64-${{ needs.resolve-version.outputs.version }}.zip` |
             | Linux | Archive | `stocktout-linux-x64-${{ needs.resolve-version.outputs.version }}.tar.gz` |
+            | Linux | Paquet Ubuntu/Debian | `stocktout-linux-x64-${{ needs.resolve-version.outputs.version }}-amd64.deb` |
 
             ### Installation
             - **Windows** : lancez le `*-setup.exe` (assistant en francais, raccourcis + desinstallation inclus). Ou decompressez le ZIP portable.
             - **macOS** : ouvrez le DMG, glissez `StockTout` vers Applications. Au premier lancement, clic droit > Ouvrir.
-            - **Linux** : `tar -xzf stocktout-linux-*.tar.gz && ./stocktout/stocktout`
+            - **Linux** : `sudo dpkg -i stocktout-linux-*-amd64.deb` (recommande, menu + icone). Ou archive : `tar -xzf stocktout-linux-*.tar.gz && ./stocktout/stocktout`
 
             > Builds produits automatiquement par le workflow manuel `Release`.
             > Non inclus : Windows ARM64 (VS2026 non reconnu par Flutter 3.24)

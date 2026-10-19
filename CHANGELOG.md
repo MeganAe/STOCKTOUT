@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.0 — 2026-10-19
+
+- Fix installeur Windows : AppId Inno corrige (accolades doubles).
+- Paquet Ubuntu/Debian (.deb) : menu, icone, dependances.
+- Etape Inno : arret immediat si la compilation echoue.
+
 ## 1.3.0 — 2026-10-19
 
 - Installeur Windows (Setup.exe, Inno Setup, sans admin, FR/EN).

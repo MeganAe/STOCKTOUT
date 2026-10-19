@@ -31,6 +31,7 @@ Allez dans **Releases** sur GitHub et prenez le fichier pour votre systeme :
 | macOS Silicon | DMG (recommande) | `stocktout-macos-arm64-VERSION.dmg` |
 | macOS Silicon | ZIP | `stocktout-macos-arm64-VERSION.zip` |
 | Linux | Archive | `stocktout-linux-x64-VERSION.tar.gz` |
+| Linux | Paquet Ubuntu/Debian | `stocktout-linux-x64-VERSION-amd64.deb` |
 
 > Non inclus pour l'instant : Windows ARM64 (le runner ARM n'a que
 > VS2026, non reconnu par Flutter 3.24) et Linux ARM64 (pas de SDK
@@ -58,8 +59,8 @@ Tout se fait depuis GitHub, sans rien installer :
 1. Poussez le code sur `main`.
 2. Onglet **Actions** > **Release** > **Run workflow**.
 3. Choisissez les plateformes, lancez.
-4. La release est publiee directement avec les 7 fichiers (setup,
-   DMG, ZIP, archive — ou en brouillon si `draft: true`).
+4. La release est publiee directement avec les 8 fichiers (setup,
+   DMG, ZIP, archive, deb — ou en brouillon si `draft: true`).
 
 Detail : [docs/BUILD.md](docs/BUILD.md).
 

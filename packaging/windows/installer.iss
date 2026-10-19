@@ -11,7 +11,7 @@
 #define AppExe "stocktout.exe"
 
 [Setup]
-AppId={8F4A2C1D-7E3B-4F5A-9D6C-2B8E5A1C4D7F}
+AppId={{8F4A2C1D-7E3B-4F5A-9D6C-2B8E5A1C4D7F}
 AppName={#AppName}
 AppVersion={#AppVersion}
 AppPublisher={#AppPublisher}

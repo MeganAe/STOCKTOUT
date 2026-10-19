@@ -63,13 +63,18 @@ Si SmartScreen affiche un avertissement : "Informations complementaires" >
 Premier lancement : clic droit > Ouvrir > Ouvrir (bypass Gatekeeper pour les
 apps non signees). Le ZIP reste dispo en secours.
 
-**Linux** :
+**Linux (Ubuntu/Debian)** : double-cliquez le `.deb`, ou :
 ```bash
-tar -xzf stocktout-linux-x64-1.0.0.tar.gz
+sudo dpkg -i stocktout-linux-x64-VERSION-amd64.deb
+```
+L'app apparait dans le menu avec son icone, et `stocktout` marche dans
+le terminal. Alternative portable :
+```bash
+tar -xzf stocktout-linux-x64-VERSION.tar.gz
 ./stocktout/stocktout
 ```
 Note : installez `zenity` pour les dialogues de fichiers
-(`sudo apt install zenity` sur Ubuntu/Debian).
+(`sudo apt install zenity`).
 
 ## 5. Versions suivantes
 
@@ -105,6 +110,10 @@ create-dmg --volname "StockTout" --window-size 600 400 --icon-size 100 \
   --icon "StockTout.app" 150 185 --app-drop-link 450 185 \
   stocktout-macos.dmg build/macos/Build/Products/Release/StockTout.app
 ```
+
+**Linux** (sur Ubuntu/Debian avec Flutter) : `flutter build linux --release`,
+puis recopiez le bloc "Build .deb" du workflow (dossier `pkgdeb` +
+`dpkg-deb --build`).
 
 ## 8. CI (auto)
 
