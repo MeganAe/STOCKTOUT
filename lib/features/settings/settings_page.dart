@@ -8,7 +8,6 @@ import '../../core/l10n/app_localizations.dart';
 import '../../core/models/currency.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/services/backup_service.dart';
-import '../../core/services/demo_seeder.dart';
 import '../../widgets/feature_tour.dart';
 import '../onboarding/onboarding_page.dart';
 
@@ -263,20 +262,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                 builder: (_) => OnboardingPage(
                                   onDone: () => Navigator.pop(context),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                        OutlinedButton.icon(
-                          icon: const Icon(Icons.science_outlined),
-                          label: Text(t.loadDemo),
-                          onPressed: () async {
-                            final n = await DemoSeeder.seedIfEmpty(t);
-                            if (!context.mounted) return;
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content:
-                                    Text(n > 0 ? t.demoDone : t.demoExists),
                               ),
                             );
                           },

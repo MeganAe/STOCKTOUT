@@ -6,13 +6,17 @@
   interlignes retravailles, tableaux et boutons plus lisibles.
 - Traduction complete : 192 chaines x 27 langues. Plus aucun texte en dur
   dans les ecrans (parametres, ventes, achats, contacts, rapports,
-  automatisations, dialogues, messages, exports CSV/PDF, donnees d'exemple).
+  automatisations, dialogues, messages, exports CSV/PDF).
 - Visite guidee sur chaque ecran a la premiere ouverture : halo sur la zone
   concernee, fleche, Passer / Suivant, et reglage dans Parametres.
 - Fenetre : ouverture centree sur l'ecran, contenu pret avant affichage
   (plus de saut au demarrage).
 - Onboarding : transitions adoucies, pastilles animees, bouton Retour,
   mise en page responsive.
+- Suppression des donnees d'exemple : plus de bouton "Charger des exemples"
+  (accueil et parametres), service de demonstration retire, traductions
+  correspondantes nettoyees. Le dernier ecran du tutoriel propose
+  directement Commencer.
 
 ## 1.5.1 — 2026-10-22
 

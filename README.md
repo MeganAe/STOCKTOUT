@@ -4,7 +4,7 @@ Logiciel de gestion de stock pour tout type de commerce : boutique, depot, pharm
 
 Fonctionne **hors-ligne**. Vos donnees restent sur votre machine (base SQLite locale).
 
-Interface entierement traduite : menus, formulaires, dialogues, messages, exports et donnees d'exemple suivent la langue choisie. La fenetre s'ouvre centree sur l'ecran.
+Interface entierement traduite : menus, formulaires, dialogues, messages et exports suivent la langue choisie. La fenetre s'ouvre centree sur l'ecran.
 
 Windows, macOS, Linux et Android. Intel/AMD et ARM.
 

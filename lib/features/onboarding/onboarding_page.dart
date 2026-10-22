@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/l10n/app_localizations.dart';
-import '../../core/services/demo_seeder.dart';
 
-/// Tutoriel de premier lancement : 5 ecrans animes + donnees d'exemple.
+/// Tutoriel de premier lancement : 5 ecrans animes.
 /// Rejouable depuis Parametres.
 class OnboardingPage extends StatefulWidget {
   final VoidCallback onDone;
@@ -152,13 +151,14 @@ class _OnboardingPageState extends State<OnboardingPage>
                             alignment: WrapAlignment.center,
                             children: [
                               OutlinedButton.icon(
-                                icon: const Icon(Icons.science_outlined),
-                                label: Text(t.loadDemo),
-                                onPressed: _loadDemo,
+                                onPressed: () => _go(-1),
+                                icon: const Icon(Icons.arrow_back, size: 18),
+                                label: Text(t.obPrev),
                               ),
-                              FilledButton(
+                              FilledButton.icon(
                                 onPressed: widget.onDone,
-                                child: Text(t.obStart),
+                                icon: const Icon(Icons.check, size: 18),
+                                label: Text(t.obStart),
                               ),
                             ],
                           )
@@ -185,15 +185,6 @@ class _OnboardingPageState extends State<OnboardingPage>
           ),
         ),
       ),
-    );
-  }
-
-  Future<void> _loadDemo() async {
-    final t = AppLocalizations.of(context);
-    final n = await DemoSeeder.seedIfEmpty(t);
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(n > 0 ? t.demoDone : t.demoExists)),
     );
   }
 }
