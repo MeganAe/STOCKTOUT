@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -20,7 +21,9 @@ class AppDatabase {
 
   Future<void> init() async {
     final dir = await getApplicationDocumentsDirectory();
-    final path = p.join(dir.path, 'stocktout', 'stocktout.db');
+    final folder = Directory(p.join(dir.path, 'stocktout'));
+    if (!await folder.exists()) await folder.create(recursive: true);
+    final path = p.join(folder.path, 'stocktout.db');
     _db = await databaseFactory.openDatabase(
       path,
       options: OpenDatabaseOptions(
