@@ -4,6 +4,17 @@ on:
     branches: [main, develop]
   pull_request:
 jobs:
+  # Verifie les fichiers de workflow avant tout : une expression invalide
+  # fait echouer un run des la premiere seconde, sans aucun log utile.
+  workflows-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verifier les fichiers de workflow
+        run: |
+          bash <(curl -fsSL https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color
+
   analyze-test:
     runs-on: ubuntu-latest
     steps:

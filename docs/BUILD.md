@@ -196,3 +196,34 @@ Les fichiers Inter sont dans `assets/fonts/` et declares dans `pubspec.yaml`
 - Les ecritures non latines (cyrillique, grec, arabe, CJK...) utilisent la
   police systeme : aucun telechargement, aucune dependance reseau.
 
+## Mettre a jour vers une nouvelle version
+
+Un ZIP extrait **par-dessus** l'ancien dossier ne supprime pas les fichiers
+qui ont disparu de l'archive (Dart les compile quand meme, et la CI echoue).
+Deux facons de faire, au choix :
+
+```bash
+# 1. Repartir d'un dossier vide (le plus sur)
+rm -rf stocktout && unzip stocktout-vX.Y.Z-github.zip
+```
+
+```bash
+# 2. Garder le dossier, effacer les fichiers retires de la version
+git rm --cached -r . >/dev/null   # facultatif
+git clean -fdx                     # supprime tout ce qui n'est pas versionne
+git status                         # verifier avant de committer
+```
+
+Fichiers retires au fil des versions (a supprimer s'ils trainent encore) :
+
+| Version | Fichier retire |
+|---|---|
+| 1.5.0 | `test/bisect_test.dart` |
+| 1.6.1 | `lib/core/services/demo_seeder.dart` |
+
+Verification rapide avant de pousser :
+
+```bash
+flutter analyze   # doit afficher "No issues found!"
+```
+

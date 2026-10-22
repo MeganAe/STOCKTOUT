@@ -256,6 +256,9 @@ jobs:
     if: inputs.platforms == 'all' || inputs.platforms == 'android'
     needs: resolve-version
     runs-on: ubuntu-latest
+    # "secrets" n'est pas autorise dans un if: -> on calcule le drapeau ici.
+    env:
+      HAS_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE_B64 != '' }}
     steps:
       - uses: actions/checkout@v4
       # AGP 8 (Flutter 3.24) exige JDK 17.
@@ -271,7 +274,7 @@ jobs:
       - run: flutter pub get
       - name: Restore keystore (optional)
         run: |
-          if [ -n "${{ secrets.ANDROID_KEYSTORE_B64 }}" ]; then
+          if [ "$HAS_KEYSTORE" = "true" ]; then
             echo "${{ secrets.ANDROID_KEYSTORE_B64 }}" | base64 -d > android/upload-keystore.jks
             cat > android/key.properties <<EOF
           storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -293,7 +296,7 @@ jobs:
       # AAB (Play Store) uniquement si signature release disponible :
       # un AAB signe en debug est refuse par Google Play.
       - name: Build AAB (Play Store)
-        if: ${{ secrets.ANDROID_KEYSTORE_B64 != '' }}
+        if: env.HAS_KEYSTORE == 'true'
         run: |
           VER="${{ needs.resolve-version.outputs.version }}"
           flutter build appbundle --release

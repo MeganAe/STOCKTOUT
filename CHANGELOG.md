@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.6.2 — 2026-10-22
+
+- Workflow corrige : l'etape AAB testait `secrets` dans un `if:`, ce que
+  GitHub refuse (echec immediat "Invalid workflow file", sans log). Le
+  drapeau est maintenant calcule dans l'`env` du job android.
+- La CI verifie desormais les fichiers de workflow avec actionlint, pour
+  attraper ce genre d'erreur avant une release.
+- Suppression des donnees d'exemple : plus de bouton "Charger des exemples"
+  (accueil et parametres), service de demonstration retire, traductions
+  correspondantes nettoyees. Le dernier ecran du tutoriel propose
+  directement Commencer.
+- docs/BUILD.md : section "Mettre a jour vers une nouvelle version"
+  (fichiers retires, extraction propre).
+
 ## 1.6.0 — 2026-10-22
 
 - Typographie : police Inter embarquee partout, echelle de tailles et
@@ -13,10 +27,6 @@
   (plus de saut au demarrage).
 - Onboarding : transitions adoucies, pastilles animees, bouton Retour,
   mise en page responsive.
-- Suppression des donnees d'exemple : plus de bouton "Charger des exemples"
-  (accueil et parametres), service de demonstration retire, traductions
-  correspondantes nettoyees. Le dernier ecran du tutoriel propose
-  directement Commencer.
 
 ## 1.5.1 — 2026-10-22
 
