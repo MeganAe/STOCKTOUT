@@ -1,5 +1,31 @@
 # Changelog
 
+## 1.6.0 — 2026-10-22
+
+- Typographie : police Inter embarquee partout, echelle de tailles et
+  interlignes retravailles, tableaux et boutons plus lisibles.
+- Traduction complete : 192 chaines x 27 langues. Plus aucun texte en dur
+  dans les ecrans (parametres, ventes, achats, contacts, rapports,
+  automatisations, dialogues, messages, exports CSV/PDF, donnees d'exemple).
+- Visite guidee sur chaque ecran a la premiere ouverture : halo sur la zone
+  concernee, fleche, Passer / Suivant, et reglage dans Parametres.
+- Fenetre : ouverture centree sur l'ecran, contenu pret avant affichage
+  (plus de saut au demarrage).
+- Onboarding : transitions adoucies, pastilles animees, bouton Retour,
+  mise en page responsive.
+
+## 1.5.1 — 2026-10-22
+
+- Nouvelle icone auteur (couches empilees) partout : Windows, macOS,
+  Linux, Android, in-app, splash. Ancien logo supprime.
+
+## 1.5.0 — 2026-10-22
+
+- Android : APK a chaque release (+ AAB Play Store si keystore configure).
+- Interface mobile : barre de navigation basse, caisse et inventaire adaptes.
+- Signature release par keystore local ou secrets GitHub (APK debug sinon).
+- Test de demarrage corrige (SQLite reel hors fausse horloge, prefs simulees).
+
 ## 1.4.0 — 2026-10-19
 
 - Fix installeur Windows : AppId Inno corrige (accolades doubles).

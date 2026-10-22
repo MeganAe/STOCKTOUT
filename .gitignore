@@ -35,3 +35,9 @@ Thumbs.db
 
 # Fichiers generes par flutter build/pub (ne jamais commiter)
 **/ephemeral/
+
+# Signature Android (ne jamais commiter ! voir docs/BUILD.md)
+*.keystore
+*.jks
+key.properties
+android/key.properties

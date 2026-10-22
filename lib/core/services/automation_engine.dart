@@ -1,4 +1,5 @@
 import '../database/database.dart';
+import '../l10n/app_localizations.dart';
 import '../models/automation.dart';
 import '../models/product.dart';
 
@@ -6,9 +7,10 @@ import '../models/product.dart';
 /// Chaque evenement (vente, stock bas, rapport planifie...) passe ici.
 class AutomationEngine {
   final AppDatabase db;
+  final AppLocalizations t;
   final void Function(String title, String body)? onNotify;
 
-  AutomationEngine(this.db, {this.onNotify});
+  AutomationEngine(this.db, this.t, {this.onNotify});
 
   Future<List<String>> fire(AutoTrigger trigger, {Product? product}) async {
     final rules = await db.allAutomations();
@@ -25,18 +27,18 @@ class AutomationEngine {
           case AutoAction.createPurchaseDraft:
             if (product != null) {
               await _createPurchaseDraft(product);
-              fired.add('${r.name}: brouillon commande ${product.sku}');
+              fired.add('${r.name}: ${t.actDraft} ${product.sku}');
             }
             break;
           case AutoAction.exportCsv:
-            fired.add('${r.name}: export planifie');
+            fired.add('${r.name}: ${t.actExport}');
             break;
           case AutoAction.printReport:
-            fired.add('${r.name}: impression planifiee');
+            fired.add('${r.name}: ${t.actPrint}');
             break;
           case AutoAction.adjustPrice:
           case AutoAction.webhook:
-            fired.add('${r.name}: action ${a.value} (voir logs)');
+            fired.add('${r.name}: ${t.actions} ${a.value}');
             break;
         }
       }
@@ -44,24 +46,20 @@ class AutomationEngine {
     return fired;
   }
 
-  String _messageFor(AutoTrigger t, Product? p) {
-    switch (t) {
+  String _messageFor(AutoTrigger trigger, Product? p) {
+    switch (trigger) {
       case AutoTrigger.stockLow:
-        return p != null
-            ? '${p.name} passe sous le seuil (${p.quantity} restants).'
-            : 'Un produit passe sous le seuil.';
+        return p != null ? '${p.name} — ${t.trgStockLow}' : t.trgStockLow;
       case AutoTrigger.outOfStock:
-        return p != null ? '${p.name} est en rupture.' : 'Rupture de stock.';
+        return p != null ? '${p.name} — ${t.trgOutOfStock}' : t.trgOutOfStock;
       case AutoTrigger.saleCreated:
-        return 'Nouvelle vente enregistree.';
+        return t.trgSale;
       case AutoTrigger.productExpiry:
-        return p != null
-            ? '${p.name} approche de sa date limite.'
-            : 'Produit proche peremption.';
+        return p != null ? '${p.name} — ${t.trgExpiry}' : t.trgExpiry;
       case AutoTrigger.dailyReport:
-        return 'Rapport du jour pret.';
+        return t.trgDaily;
       case AutoTrigger.scheduled:
-        return 'Tache planifiee executee.';
+        return t.trgScheduled;
     }
   }
 
@@ -77,7 +75,7 @@ class AutomationEngine {
       'status': 'draft',
       'currency': 'USD',
       'rate': 1,
-      'notes': 'Genere automatiquement (rupture ${p.name})',
+      'notes': '${t.autoDraft} (${p.name})',
     });
   }
 }

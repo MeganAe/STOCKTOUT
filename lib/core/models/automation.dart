@@ -73,22 +73,20 @@ class AutomationRule {
   }
 
   /// Regles proposees a la premiere ouverture.
+  /// Les noms sont des codes traduits a l'affichage.
   static List<AutomationRule> presets() => [
         AutomationRule(
-          name: 'Alerte stock bas',
-          description: 'Notifie quand un produit passe sous le seuil.',
+          name: 'preset_low',
           trigger: AutoTrigger.stockLow,
           actions: const [AutoAction.notify],
         ),
         AutomationRule(
-          name: 'Brouillon commande auto',
-          description: 'Cree un brouillon de commande en rupture.',
+          name: 'preset_draft',
           trigger: AutoTrigger.outOfStock,
           actions: const [AutoAction.createPurchaseDraft, AutoAction.notify],
         ),
         AutomationRule(
-          name: 'Rapport quotidien 18h',
-          description: 'Exporte les ventes du jour en CSV.',
+          name: 'preset_report',
           trigger: AutoTrigger.dailyReport,
           actions: const [AutoAction.exportCsv],
         ),

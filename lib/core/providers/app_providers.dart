@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../database/database.dart';
+import '../l10n/app_localizations.dart';
 import '../models/automation.dart';
 import '../models/currency.dart';
 import '../models/product.dart';
@@ -87,7 +88,11 @@ final currencyServiceProvider = Provider<CurrencyService>((ref) {
 });
 
 final automationEngineProvider = Provider<AutomationEngine>((ref) {
-  return AutomationEngine(AppDatabase.instance);
+  final settings = ref.watch(settingsProvider);
+  return AutomationEngine(
+    AppDatabase.instance,
+    AppLocalizations(settings.locale),
+  );
 });
 
 // ---------- Donnees ----------

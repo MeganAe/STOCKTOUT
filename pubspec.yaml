@@ -1,7 +1,7 @@
 name: stocktout
 description: Logiciel de gestion de stock multi-plateforme pour tout type de commerce.
 publish_to: "none"
-version: 1.4.0+9
+version: 1.6.0+12
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
@@ -36,10 +36,34 @@ dev_dependencies:
     sdk: flutter
   flutter_lints: ^4.0.0
   build_runner: ^2.4.9
+  path_provider_platform_interface: ^2.1.0
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
     - assets/icons/
+    - assets/fonts/
     - l10n/
+
+  fonts:
+    - family: Inter
+      fonts:
+        - asset: assets/fonts/inter-latin-400.ttf
+          weight: 400
+        - asset: assets/fonts/inter-latin-500.ttf
+          weight: 500
+        - asset: assets/fonts/inter-latin-600.ttf
+          weight: 600
+        - asset: assets/fonts/inter-latin-700.ttf
+          weight: 700
+    - family: InterExt
+      fonts:
+        - asset: assets/fonts/inter-latin-ext-400.ttf
+          weight: 400
+        - asset: assets/fonts/inter-latin-ext-500.ttf
+          weight: 500
+        - asset: assets/fonts/inter-latin-ext-600.ttf
+          weight: 600
+        - asset: assets/fonts/inter-latin-ext-700.ttf
+          weight: 700

@@ -32,7 +32,7 @@ class _ProductDialogState extends State<ProductDialog> {
     _name = TextEditingController(text: p?.name ?? '');
     _barcode = TextEditingController(text: p?.barcode ?? '');
     _category = TextEditingController(text: p?.category ?? '');
-    _unit = TextEditingController(text: p?.unit ?? 'piece');
+    _unit = TextEditingController(text: p?.unit ?? '');
     _buy = TextEditingController(text: p != null ? '${p.buyPrice}' : '0');
     _sell = TextEditingController(text: p != null ? '${p.sellPrice}' : '0');
     _qty = TextEditingController(text: p != null ? '${p.quantity}' : '0');
@@ -85,15 +85,14 @@ class _ProductDialogState extends State<ProductDialog> {
                     Expanded(
                         child: TextFormField(
                             controller: _barcode,
-                            decoration: const InputDecoration(
-                                labelText: 'Code-barres'))),
+                            decoration: InputDecoration(labelText: t.barcode))),
                   ]),
                   const SizedBox(height: 12),
                   TextFormField(
                     controller: _name,
                     decoration: InputDecoration(labelText: t.productName),
                     validator: (v) =>
-                        (v == null || v.trim().isEmpty) ? 'Requis' : null,
+                        (v == null || v.trim().isEmpty) ? t.required : null,
                   ),
                   const SizedBox(height: 12),
                   Row(children: [
@@ -106,8 +105,8 @@ class _ProductDialogState extends State<ProductDialog> {
                     Expanded(
                         child: TextFormField(
                             controller: _unit,
-                            decoration: const InputDecoration(
-                                labelText: 'Unite (piece, kg, L...)'))),
+                            decoration:
+                                InputDecoration(labelText: t.unitHint))),
                   ]),
                   const SizedBox(height: 12),
                   Row(children: [
@@ -175,7 +174,7 @@ class _ProductDialogState extends State<ProductDialog> {
       name: _name.text.trim(),
       barcode: _barcode.text.trim().isEmpty ? null : _barcode.text.trim(),
       category: _category.text.trim().isEmpty ? null : _category.text.trim(),
-      unit: _unit.text.trim(),
+      unit: _unit.text.trim().isEmpty ? 'pc' : _unit.text.trim(),
       buyPrice: _num(_buy),
       sellPrice: _num(_sell),
       quantity: _num(_qty),

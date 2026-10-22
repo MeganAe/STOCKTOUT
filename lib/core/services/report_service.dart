@@ -3,6 +3,7 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
 import '../database/database.dart';
+import '../l10n/app_localizations.dart';
 import '../models/product.dart';
 
 /// Exports CSV / PDF. Utilise par les rapports et les automatisations.
@@ -10,17 +11,17 @@ class ReportService {
   final AppDatabase db;
   ReportService(this.db);
 
-  Future<String> productsCsv() async {
+  Future<String> productsCsv(AppLocalizations t) async {
     final products = await db.allProducts();
     final rows = <List<Object?>>[
       [
-        'SKU',
-        'Nom',
-        'Categorie',
-        'Quantite',
-        'Prix achat',
-        'Prix vente',
-        'Valeur'
+        t.sku,
+        t.productName,
+        t.category,
+        t.quantity,
+        t.buyPrice,
+        t.sellPrice,
+        t.stockValue,
       ],
       ...products.map((e) => [
             e.sku,
@@ -35,15 +36,22 @@ class ReportService {
     return const ListToCsvConverter().convert(rows);
   }
 
-  Future<pw.Document> stockPdf(List<Product> products) async {
+  Future<pw.Document> stockPdf(
+      List<Product> products, AppLocalizations t) async {
     final doc = pw.Document();
     doc.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
         build: (ctx) => [
-          pw.Header(level: 0, child: pw.Text('Etat du stock')),
+          pw.Header(level: 0, child: pw.Text(t.stockPdf)),
           pw.TableHelper.fromTextArray(
-            headers: ['SKU', 'Produit', 'Qte', 'P. vente', 'Valeur'],
+            headers: [
+              t.sku,
+              t.productName,
+              t.quantity,
+              t.sellPrice,
+              t.stockValue,
+            ],
             data: products
                 .map((e) => [
                       e.sku,

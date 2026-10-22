@@ -3,113 +3,133 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n/app_localizations.dart';
 import '../../core/providers/app_providers.dart';
+import '../../widgets/feature_tour.dart';
 
-class DashboardPage extends ConsumerWidget {
+class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends ConsumerState<DashboardPage> {
+  final kStats = GlobalKey();
+  final kSales = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final productsAsync = ref.watch(productsProvider);
     final salesAsync = ref.watch(salesProvider);
     final settings = ref.watch(settingsProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(t.dashboard)),
-      body: RefreshIndicator(
-        onRefresh: () async {
-          ref.invalidate(productsProvider);
-          ref.invalidate(salesProvider);
-        },
-        child: ListView(
-          padding: const EdgeInsets.all(20),
-          children: [
-            productsAsync.when(
-              loading: () => const LinearProgressIndicator(),
-              error: (e, _) => Text('$e'),
-              data: (products) {
-                final low =
-                    products.where((e) => e.isLowStock).toList(growable: false);
-                final out = products
-                    .where((e) => e.isOutOfStock)
-                    .toList(growable: false);
-                final value =
-                    products.fold<double>(0, (s, e) => s + e.stockValue);
-                return Wrap(
-                  spacing: 12,
-                  runSpacing: 12,
-                  children: [
-                    _StatCard(
-                        title: t.products,
-                        value: '${products.length}',
-                        icon: Icons.inventory_2),
-                    _StatCard(
-                        title: t.stockValue,
-                        value: value.toStringAsFixed(2),
-                        subtitle: settings.currency,
-                        icon: Icons.account_balance_wallet),
-                    _StatCard(
-                        title: t.lowStock,
-                        value: '${low.length}',
-                        icon: Icons.warning_amber,
-                        color: Colors.orange),
-                    _StatCard(
-                        title: t.outOfStock,
-                        value: '${out.length}',
-                        icon: Icons.remove_shopping_cart,
-                        color: Colors.red),
-                  ],
-                );
-              },
-            ),
-            const SizedBox(height: 20),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  flex: 2,
-                  child: Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(t.sales,
-                              style: Theme.of(context).textTheme.titleMedium),
-                          const SizedBox(height: 8),
-                          salesAsync.when(
-                            loading: () => const Center(
-                                child: CircularProgressIndicator()),
-                            error: (e, _) => Text('$e'),
-                            data: (sales) {
-                              if (sales.isEmpty) {
-                                return const Padding(
-                                  padding: EdgeInsets.all(16),
-                                  child: Text('Aucune vente pour le moment.'),
-                                );
-                              }
-                              return Column(
-                                children: sales.take(8).map((s) {
-                                  return ListTile(
-                                    dense: true,
-                                    leading: const Icon(Icons.receipt_long),
-                                    title: Text('${s['number']}'),
-                                    subtitle: Text('${s['date']}'),
-                                    trailing:
-                                        Text('${s['customer_name'] ?? ''}'),
+    return GuidedTour(
+      id: 'dashboard',
+      steps: [
+        TourStep(target: kStats, title: t.gsTotals, body: t.gsTotalsB),
+        TourStep(target: kSales, title: t.sales, body: t.gsListB),
+      ],
+      child: Scaffold(
+        appBar: AppBar(title: Text(t.dashboard)),
+        body: RefreshIndicator(
+          onRefresh: () async {
+            ref.invalidate(productsProvider);
+            ref.invalidate(salesProvider);
+          },
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              KeyedSubtree(
+                key: kStats,
+                child: productsAsync.when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (e, _) => Text('$e'),
+                  data: (products) {
+                    final low = products
+                        .where((e) => e.isLowStock)
+                        .toList(growable: false);
+                    final out = products
+                        .where((e) => e.isOutOfStock)
+                        .toList(growable: false);
+                    final value =
+                        products.fold<double>(0, (s, e) => s + e.stockValue);
+                    return Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: [
+                        _StatCard(
+                            title: t.products,
+                            value: '${products.length}',
+                            icon: Icons.inventory_2),
+                        _StatCard(
+                            title: t.stockValue,
+                            value: value.toStringAsFixed(2),
+                            subtitle: settings.currency,
+                            icon: Icons.account_balance_wallet),
+                        _StatCard(
+                            title: t.lowStock,
+                            value: '${low.length}',
+                            icon: Icons.warning_amber,
+                            color: Colors.orange),
+                        _StatCard(
+                            title: t.outOfStock,
+                            value: '${out.length}',
+                            icon: Icons.remove_shopping_cart,
+                            color: Colors.red),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              LayoutBuilder(
+                builder: (ctx, c) {
+                  final wide = c.maxWidth >= 720;
+                  final salesCard = KeyedSubtree(
+                    key: kSales,
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(t.sales,
+                                style: Theme.of(context).textTheme.titleMedium),
+                            const SizedBox(height: 8),
+                            salesAsync.when(
+                              loading: () => const Padding(
+                                padding: EdgeInsets.all(16),
+                                child:
+                                    Center(child: CircularProgressIndicator()),
+                              ),
+                              error: (e, _) => Text('$e'),
+                              data: (sales) {
+                                if (sales.isEmpty) {
+                                  return Padding(
+                                    padding: const EdgeInsets.all(16),
+                                    child: Text(t.noSales),
                                   );
-                                }).toList(),
-                              );
-                            },
-                          ),
-                        ],
+                                }
+                                return Column(
+                                  children: sales.take(8).map((s) {
+                                    return ListTile(
+                                      dense: true,
+                                      leading: const Icon(Icons.receipt_long),
+                                      title: Text('${s['number']}'),
+                                      subtitle: Text('${s['date']}'),
+                                      trailing:
+                                          Text('${s['customer_name'] ?? ''}'),
+                                    );
+                                  }).toList(),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Card(
+                  );
+                  final lowCard = Card(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Column(
@@ -127,7 +147,11 @@ class DashboardPage extends ConsumerWidget {
                                   .take(10)
                                   .toList();
                               if (low.isEmpty) {
-                                return const Text('Rien à signaler.');
+                                return Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8),
+                                  child: Text(t.nothingToReport),
+                                );
                               }
                               return Column(
                                 children: low
@@ -148,11 +172,28 @@ class DashboardPage extends ConsumerWidget {
                         ],
                       ),
                     ),
-                  ),
-                ),
-              ],
-            ),
-          ],
+                  );
+                  if (!wide) {
+                    return Column(
+                      children: [
+                        salesCard,
+                        const SizedBox(height: 12),
+                        lowCard,
+                      ],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(flex: 2, child: salesCard),
+                      const SizedBox(width: 12),
+                      Expanded(child: lowCard),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -176,6 +217,8 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
     return SizedBox(
       width: 220,
       child: Card(
@@ -184,25 +227,23 @@ class _StatCard extends StatelessWidget {
           child: Row(
             children: [
               CircleAvatar(
-                backgroundColor:
-                    (color ?? Theme.of(context).colorScheme.primary)
-                        .withOpacity(0.12),
-                child: Icon(icon, color: color),
+                backgroundColor: (color ?? scheme.primary).withOpacity(0.12),
+                child: Icon(icon, color: color ?? scheme.primary),
               ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(title, style: Theme.of(context).textTheme.bodySmall),
+                    Text(title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: text.bodySmall),
                     Text(value,
-                        style: Theme.of(context)
-                            .textTheme
-                            .headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.bold)),
+                        style: text.headlineSmall
+                            ?.copyWith(fontWeight: FontWeight.w700)),
                     if (subtitle != null)
-                      Text(subtitle!,
-                          style: Theme.of(context).textTheme.bodySmall),
+                      Text(subtitle!, style: text.bodySmall),
                   ],
                 ),
               ),

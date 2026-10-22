@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../core/l10n/app_localizations.dart';
+
 /// Barre de titre integree facon apps modernes (VS Code, Discord...).
 /// Remplace la barre native : deplacement par glisser, double-clic pour
 /// agrandir, boutons reduire / agrandir / fermer sur Windows et Linux.
@@ -48,6 +50,7 @@ class _TitleBarState extends State<TitleBar> with WindowListener {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
     final scheme = Theme.of(context).colorScheme;
     final isMac = Platform.isMacOS;
 
@@ -81,17 +84,17 @@ class _TitleBarState extends State<TitleBar> with WindowListener {
             if (!isMac) ...[
               _WinButton(
                 icon: Icons.remove,
-                tooltip: 'Reduire',
+                tooltip: t.minimize,
                 onTap: windowManager.minimize,
               ),
               _WinButton(
                 icon: _maximized ? Icons.filter_none : Icons.crop_square,
-                tooltip: _maximized ? 'Restaurer' : 'Agrandir',
+                tooltip: _maximized ? t.restoreBtn : t.maximize,
                 onTap: _toggleMaximize,
               ),
               _WinButton(
                 icon: Icons.close,
-                tooltip: 'Fermer',
+                tooltip: t.close,
                 hoverDanger: true,
                 onTap: windowManager.close,
               ),

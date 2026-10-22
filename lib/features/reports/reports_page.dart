@@ -9,138 +9,162 @@ import '../../core/database/database.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/services/report_service.dart';
+import '../../widgets/feature_tour.dart';
 
-class ReportsPage extends ConsumerWidget {
+class ReportsPage extends ConsumerStatefulWidget {
   const ReportsPage({super.key});
+  @override
+  ConsumerState<ReportsPage> createState() => _ReportsPageState();
+}
+
+class _ReportsPageState extends ConsumerState<ReportsPage> {
+  final kActions = GlobalKey();
+  final kChart = GlobalKey();
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final t = AppLocalizations.of(context);
     final productsAsync = ref.watch(productsProvider);
     final salesAsync = ref.watch(salesProvider);
 
-    return Scaffold(
-      appBar: AppBar(title: Text(t.reports)),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              FilledButton.icon(
-                icon: const Icon(Icons.table_view),
-                label: const Text('Export stock CSV'),
-                onPressed: () => _exportCsv(context),
-              ),
-              FilledButton.tonalIcon(
-                icon: const Icon(Icons.picture_as_pdf),
-                label: const Text('Etat stock PDF'),
-                onPressed: () => _exportPdf(context, ref),
-              ),
-              OutlinedButton.icon(
-                icon: const Icon(Icons.print),
-                label: const Text('Imprimer'),
-                onPressed: () => _exportPdf(context, ref, printIt: true),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+    return GuidedTour(
+      id: 'reports',
+      steps: [
+        TourStep(target: kActions, title: t.gsAction, body: t.gsActionB),
+        TourStep(target: kChart, title: t.gsTotals, body: t.gsTotalsB),
+      ],
+      child: Scaffold(
+        appBar: AppBar(title: Text(t.reports)),
+        body: ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            KeyedSubtree(
+              key: kActions,
+              child: Wrap(
+                spacing: 12,
+                runSpacing: 12,
                 children: [
-                  Text('Valeur par categorie',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 12),
-                  productsAsync.when(
-                    loading: () => const LinearProgressIndicator(),
-                    error: (e, _) => Text('$e'),
-                    data: (products) {
-                      final map = <String, double>{};
-                      for (final p in products) {
-                        final k = (p.category?.isEmpty ?? true)
-                            ? 'Sans categorie'
-                            : p.category!;
-                        map[k] = (map[k] ?? 0) + p.stockValue;
-                      }
-                      if (map.isEmpty) return const Text('Aucune donnee.');
-                      final max =
-                          map.values.fold<double>(0, (a, b) => a > b ? a : b);
-                      return Column(
-                        children: map.entries.map((e) {
-                          final w = max == 0 ? 0.0 : e.value / max;
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: Row(
-                              children: [
-                                SizedBox(width: 180, child: Text(e.key)),
-                                Expanded(
-                                  child: LinearProgressIndicator(value: w),
+                  FilledButton.icon(
+                    icon: const Icon(Icons.table_view),
+                    label: Text(t.exportCsv),
+                    onPressed: () => _exportCsv(context),
+                  ),
+                  FilledButton.tonalIcon(
+                    icon: const Icon(Icons.picture_as_pdf),
+                    label: Text(t.stockPdf),
+                    onPressed: () => _exportPdf(context, printIt: false),
+                  ),
+                  OutlinedButton.icon(
+                    icon: const Icon(Icons.print),
+                    label: Text(t.print),
+                    onPressed: () => _exportPdf(context, printIt: true),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            KeyedSubtree(
+              key: kChart,
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(t.valueByCategory,
+                          style: Theme.of(context).textTheme.titleMedium),
+                      const SizedBox(height: 12),
+                      productsAsync.when(
+                        loading: () => const LinearProgressIndicator(),
+                        error: (e, _) => Text('$e'),
+                        data: (products) {
+                          final map = <String, double>{};
+                          for (final p in products) {
+                            final k = (p.category?.isEmpty ?? true)
+                                ? t.noCategory
+                                : p.category!;
+                            map[k] = (map[k] ?? 0) + p.stockValue;
+                          }
+                          if (map.isEmpty) return Text(t.noData);
+                          final max = map.values
+                              .fold<double>(0, (a, b) => a > b ? a : b);
+                          return Column(
+                            children: map.entries.map((e) {
+                              final w = max == 0 ? 0.0 : e.value / max;
+                              return Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 4),
+                                child: Row(
+                                  children: [
+                                    SizedBox(width: 160, child: Text(e.key)),
+                                    Expanded(
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(4),
+                                        child: LinearProgressIndicator(
+                                            value: w, minHeight: 8),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    SizedBox(
+                                        width: 110,
+                                        child: Text(e.value.toStringAsFixed(2),
+                                            textAlign: TextAlign.right)),
+                                  ],
                                 ),
-                                const SizedBox(width: 12),
-                                SizedBox(
-                                    width: 120,
-                                    child: Text(e.value.toStringAsFixed(2),
-                                        textAlign: TextAlign.right)),
-                              ],
-                            ),
+                              );
+                            }).toList(),
                           );
-                        }).toList(),
-                      );
-                    },
+                        },
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Historique des ventes',
-                      style: Theme.of(context).textTheme.titleMedium),
-                  const SizedBox(height: 8),
-                  salesAsync.when(
-                    loading: () => const LinearProgressIndicator(),
-                    error: (e, _) => Text('$e'),
-                    data: (sales) {
-                      if (sales.isEmpty) {
-                        return const Text('Aucune vente.');
-                      }
-                      return Column(
-                        children: sales.take(20).map((s) {
-                          return ListTile(
-                            dense: true,
-                            leading: const Icon(Icons.receipt_long),
-                            title: Text('${s['number']}'),
-                            subtitle: Text(
-                                '${s['date']} · ${s['payment_method'] ?? ''}'),
-                            trailing: Text('${s['currency'] ?? ''}'),
-                          );
-                        }).toList(),
-                      );
-                    },
-                  ),
-                ],
+            const SizedBox(height: 12),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(t.salesHistory,
+                        style: Theme.of(context).textTheme.titleMedium),
+                    const SizedBox(height: 8),
+                    salesAsync.when(
+                      loading: () => const LinearProgressIndicator(),
+                      error: (e, _) => Text('$e'),
+                      data: (sales) {
+                        if (sales.isEmpty) return Text(t.noSales);
+                        return Column(
+                          children: sales.take(20).map((s) {
+                            return ListTile(
+                              dense: true,
+                              leading: const Icon(Icons.receipt_long),
+                              title: Text('${s['number']}'),
+                              subtitle: Text('${s['currency'] ?? ''}'),
+                              trailing: Text('${s['date']}'.split('T').first),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Future<void> _exportCsv(BuildContext context) async {
+    final t = AppLocalizations.of(context);
     final svc = ReportService(AppDatabase.instance);
-    final csv = await svc.productsCsv();
+    final csv = await svc.productsCsv(t);
     final path = await FilePicker.platform.saveFile(
-      dialogTitle: 'Enregistrer le CSV',
+      dialogTitle: t.saveCsvTitle,
       fileName: 'stock.csv',
       type: FileType.custom,
       allowedExtensions: ['csv'],
@@ -149,16 +173,16 @@ class ReportsPage extends ConsumerWidget {
       await File(path).writeAsString(csv);
       if (context.mounted) {
         ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text('CSV enregistre : $path')));
+            .showSnackBar(SnackBar(content: Text(t.csvSaved(path))));
       }
     }
   }
 
-  Future<void> _exportPdf(BuildContext context, WidgetRef ref,
-      {bool printIt = false}) async {
+  Future<void> _exportPdf(BuildContext context, {required bool printIt}) async {
+    final t = AppLocalizations.of(context);
     final products = await AppDatabase.instance.allProducts();
     final svc = ReportService(AppDatabase.instance);
-    final doc = await svc.stockPdf(products);
+    final doc = await svc.stockPdf(products, t);
     if (printIt) {
       await Printing.layoutPdf(onLayout: (_) => doc.save());
     } else {

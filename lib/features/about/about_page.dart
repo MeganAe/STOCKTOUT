@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import '../../core/l10n/app_localizations.dart';
+
 /// Seule page mentionnant l'auteur.
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
@@ -23,6 +25,8 @@ class _AboutPageState extends State<AboutPage> {
 
   @override
   Widget build(BuildContext context) {
+    final t = AppLocalizations.of(context);
+    final text = Theme.of(context).textTheme;
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 480),
       child: Padding(
@@ -31,37 +35,36 @@ class _AboutPageState extends State<AboutPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
               child: Image.asset(
                 'assets/images/logo.png',
-                width: 64,
-                height: 64,
+                width: 72,
+                height: 72,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
             Text('StockTout',
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                    )),
+                style:
+                    text.headlineSmall?.copyWith(fontWeight: FontWeight.w700)),
             if (_version.isNotEmpty)
-              Text('Version $_version',
-                  style: Theme.of(context).textTheme.bodySmall),
-            const SizedBox(height: 12),
-            const Text(
-              'Logiciel de gestion de stock pour commerces, boutiques, depots et PME. '
-              'Fonctionne hors-ligne, vos donnees restent sur votre machine.',
+              Text('${t.version} $_version', style: text.bodySmall),
+            const SizedBox(height: 14),
+            Text(
+              t.aboutBody,
               textAlign: TextAlign.center,
+              style: text.bodyMedium,
             ),
             const SizedBox(height: 16),
             const Divider(),
             const SizedBox(height: 8),
             // ---- Auteur (uniquement ici) ----
-            const Text('Auteur : Metoushela Walker'),
-            const Text('GitHub : MeganAe/STOCKOUT'),
+            Text(t.author, style: text.bodySmall),
+            const Text('github.com/MeganAe/STOCKOUT',
+                style: TextStyle(fontSize: 12)),
             const SizedBox(height: 16),
             FilledButton(
               onPressed: () => Navigator.pop(context),
-              child: const Text('Fermer'),
+              child: Text(t.close),
             ),
           ],
         ),

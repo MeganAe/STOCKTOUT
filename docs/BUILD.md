@@ -24,19 +24,21 @@ git push -u origin main
    - `platforms` : `all` pour tout compiler, ou une seule plateforme.
    - `draft` : `false` = publie directement. Mettez `true` pour relire
      la release en brouillon avant publication (onglet Releases > Draft).
-4. Lancez. Duree : ~15-30 min pour les 6 builds.
-5. Quand c'est vert, allez dans **Releases** : les 4 fichiers y sont
-   (publies directement, sauf si `draft: true`).
+4. Lancez. Duree : ~20-35 min pour les 5 builds.
+5. Quand c'est vert, allez dans **Releases** : les 9 fichiers y sont
+   (10 avec le AAB si le keystore est configure, publies directement,
+   sauf si `draft: true`).
 6. Relisez les notes, cliquez **Publish release**.
 
 ## 3. Ce qui est compile
 
 | Job | Runner | Sortie |
 |---|---|---|
-| windows-x64 | windows-2022 (epingle : VS2022) | ZIP avec `stocktout.exe` |
-| macos-x64 | macos-15-intel | ZIP avec `StockTout.app` |
-| macos-arm64 | macos-15 | ZIP avec `StockTout.app` |
-| linux-x64 | ubuntu-22.04 | tar.gz du bundle |
+| windows-x64 | windows-2022 (epingle : VS2022) | Setup.exe + ZIP avec `stocktout.exe` |
+| macos-x64 | macos-15-intel | DMG + ZIP avec `StockTout.app` |
+| macos-arm64 | macos-15 | DMG + ZIP avec `StockTout.app` |
+| linux-x64 | ubuntu-22.04 | tar.gz du bundle + .deb |
+| android | ubuntu-latest (JDK 17) | APK (+ AAB si keystore) |
 
 Runners epingles volontairement, pas de `-latest` :
 - `windows-2022` : `windows-latest` est passe a VS2026, que Flutter 3.24
@@ -76,6 +78,12 @@ tar -xzf stocktout-linux-x64-VERSION.tar.gz
 Note : installez `zenity` pour les dialogues de fichiers
 (`sudo apt install zenity`).
 
+**Android** : copiez l'APK sur le telephone et ouvrez-le (autorisez les
+installations de « sources inconnues » si le telephone le demande).
+Aucune permission requise, 100 % hors-ligne. Sans keystore, l'APK est
+signe en debug : il s'installe et fonctionne, mais ne peut pas etre
+publie sur le Play Store (voir section 8).
+
 ## 5. Versions suivantes
 
 ```bash
@@ -91,8 +99,9 @@ git add -A && git commit -m "1.1.0" && git push
   SmartScreen affiche un avertissement, l'app reste utilisable.
 - **macOS** : compte Apple Developer (99 $/an), `codesign` + `notarytool`.
   Sans signature, l'ouverture par clic droit reste possible.
-- **Linux** : pas de signature requise. Un `.deb` peut etre ajoute plus tard
-  (voir `scripts/`).
+- **Linux** : pas de signature requise.
+- **Android** : keystore de signature, voir section 8. Sans keystore,
+  l'APK est signe en debug (installable, pas publiable sur Play).
 
 ## 7. Construire les installeurs en local
 
@@ -115,7 +124,75 @@ create-dmg --volname "StockTout" --window-size 600 400 --icon-size 100 \
 puis recopiez le bloc "Build .deb" du workflow (dossier `pkgdeb` +
 `dpkg-deb --build`).
 
-## 8. CI (auto)
+**Android** (avec Flutter + SDK Android + JDK 17) :
+```bash
+flutter build apk --release        # -> build/app/outputs/flutter-apk/
+flutter build appbundle --release  # -> build/app/outputs/bundle/
+```
+Sans `android/key.properties`, la compilation signe en debug
+(voir section 8).
+
+## 8. Android : signer en release (keystore)
+
+Le keystore identifie l'editeur. **Gardez-le precieusement : sans lui,
+impossible de mettre a jour l'app sur le Play Store.**
+
+### 8.1 Creer le keystore (une fois)
+
+```bash
+keytool -genkeypair -v -keystore upload-keystore.jks \
+  -alias stocktout -keyalg RSA -keysize 2048 -validity 10000
+```
+
+`keytool` est fourni avec le JDK. Notez le mot de passe du keystore,
+le mot de passe de la cle et l'alias.
+
+### 8.2 Signer en local
+
+Copiez le keystore dans `android/` (sans le committer, il est ignore
+par git) et creez `android/key.properties` (ignore aussi) :
+
+```properties
+storePassword=VOTRE_MOT_DE_PASSE_KEYSTORE
+keyPassword=VOTRE_MOT_DE_PASSE_CLE
+keyAlias=stocktout
+storeFile=upload-keystore.jks
+```
+
+Puis `flutter build apk --release` / `flutter build appbundle --release`.
+Sans ce fichier, la compilation bascule automatiquement sur la
+signature debug.
+
+### 8.3 Signer sur GitHub (AAB Play Store)
+
+1. Encodez le keystore en base64 :
+   ```bash
+   base64 -w0 upload-keystore.jks > keystore.b64   # Linux
+   # macOS : base64 -i upload-keystore.jks -o keystore.b64
+   ```
+2. Depot GitHub > **Settings** > **Secrets and variables** > **Actions** >
+   **New repository secret**, ajoutez :
+   - `ANDROID_KEYSTORE_B64` : contenu du fichier `keystore.b64`
+   - `ANDROID_KEYSTORE_PASSWORD` : mot de passe du keystore
+   - `ANDROID_KEY_PASSWORD` : mot de passe de la cle
+   - `ANDROID_KEY_ALIAS` : alias (`stocktout`)
+3. Relancez le workflow **Release** : l'AAB signe en release est joint
+   a la release, pret pour la Play Console.
+
+## 9. CI (auto)
 
 Le workflow `CI` tourne a chaque push : format, analyse, tests.
 Il ne publie rien, il verifie juste que le code est sain.
+
+## Polices
+
+Les fichiers Inter sont dans `assets/fonts/` et declares dans `pubspec.yaml`
+(famille `Inter`, secours `InterExt` pour les alphabets etendus).
+
+- Licence : SIL Open Font License 1.1, texte complet dans
+  `assets/fonts/OFL.txt`. Redistribution autorisee avec le logiciel.
+- Pour mettre a jour : remplacer les 8 fichiers `.ttf` (400/500/600/700,
+  sous-ensembles latin et latin-ext), rien d'autre a changer.
+- Les ecritures non latines (cyrillique, grec, arabe, CJK...) utilisent la
+  police systeme : aucun telechargement, aucune dependance reseau.
+
