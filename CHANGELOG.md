@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.6.3 — 2026-10-22
+
+- Workflows durcis : variables shell entre guillemets, chemins de globs
+  explicites, script .deb blinde. actionlint + shellcheck passent sans
+  aucun avertissement, en local comme sur la CI.
+
 ## 1.6.2 — 2026-10-22
 
 - Workflow corrige : l'etape AAB testait `secrets` dans un `if:`, ce que

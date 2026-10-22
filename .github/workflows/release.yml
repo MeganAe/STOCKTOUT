@@ -63,12 +63,12 @@ jobs:
         shell: bash
         run: |
           if [ -n "${{ inputs.version }}" ]; then
-            echo "version=${{ inputs.version }}" >> $GITHUB_OUTPUT
+            echo "version=${{ inputs.version }}" >> "$GITHUB_OUTPUT"
           else
             VER=$(grep '^version:' pubspec.yaml | sed 's/version: //' | cut -d+ -f1 | tr -d ' "')
-            echo "version=$VER" >> $GITHUB_OUTPUT
+            echo "version=$VER" >> "$GITHUB_OUTPUT"
           fi
-          cat $GITHUB_OUTPUT
+          cat "$GITHUB_OUTPUT"
 
   # ---------------- WINDOWS ----------------
   windows-x64:
@@ -130,7 +130,7 @@ jobs:
         run: |
           VER="${{ needs.resolve-version.outputs.version }}"
           cd build/macos/Build/Products/Release
-          ditto -c -k --keepParent *.app ../../../../../${{ env.APP_NAME }}-macos-x64-$VER.zip
+          ditto -c -k --keepParent ./*.app ../../../../../${{ env.APP_NAME }}-macos-x64-$VER.zip
       - name: Build DMG
         run: |
           VER="${{ needs.resolve-version.outputs.version }}"
@@ -170,7 +170,7 @@ jobs:
         run: |
           VER="${{ needs.resolve-version.outputs.version }}"
           cd build/macos/Build/Products/Release
-          ditto -c -k --keepParent *.app ../../../../../${{ env.APP_NAME }}-macos-arm64-$VER.zip
+          ditto -c -k --keepParent ./*.app ../../../../../${{ env.APP_NAME }}-macos-arm64-$VER.zip
       - name: Build DMG
         run: |
           VER="${{ needs.resolve-version.outputs.version }}"
@@ -217,22 +217,22 @@ jobs:
         run: |
           VER="${{ needs.resolve-version.outputs.version }}"
           PKG=pkgdeb
-          rm -rf $PKG
-          mkdir -p $PKG/DEBIAN $PKG/usr/lib/stocktout $PKG/usr/bin \
-            $PKG/usr/share/applications \
-            $PKG/usr/share/icons/hicolor/48x48/apps \
-            $PKG/usr/share/icons/hicolor/64x64/apps \
-            $PKG/usr/share/icons/hicolor/128x128/apps \
-            $PKG/usr/share/icons/hicolor/256x256/apps \
-            $PKG/usr/share/icons/hicolor/512x512/apps
-          cp -r build/linux/x64/release/bundle/* $PKG/usr/lib/stocktout/
-          ln -s /usr/lib/stocktout/stocktout $PKG/usr/bin/stocktout
-          cp packaging/linux/stocktout.desktop $PKG/usr/share/applications/
+          rm -rf "$PKG"
+          mkdir -p "$PKG/DEBIAN" "$PKG/usr/lib/stocktout" "$PKG/usr/bin" \
+            "$PKG/usr/share/applications" \
+            "$PKG/usr/share/icons/hicolor/48x48/apps" \
+            "$PKG/usr/share/icons/hicolor/64x64/apps" \
+            "$PKG/usr/share/icons/hicolor/128x128/apps" \
+            "$PKG/usr/share/icons/hicolor/256x256/apps" \
+            "$PKG/usr/share/icons/hicolor/512x512/apps"
+          cp -r build/linux/x64/release/bundle/. "$PKG/usr/lib/stocktout/"
+          ln -s /usr/lib/stocktout/stocktout "$PKG/usr/bin/stocktout"
+          cp packaging/linux/stocktout.desktop "$PKG/usr/share/applications/"
           for s in 48 64 128 256 512; do
-            cp assets/icons/png/appicon_$s.png \
-              $PKG/usr/share/icons/hicolor/${s}x${s}/apps/stocktout.png
+            cp "assets/icons/png/appicon_$s.png" \
+              "$PKG/usr/share/icons/hicolor/${s}x${s}/apps/stocktout.png"
           done
-          cat > $PKG/DEBIAN/control <<EOF
+          cat > "$PKG/DEBIAN/control" <<EOF
           Package: stocktout
           Version: $VER
           Section: office
@@ -244,8 +244,8 @@ jobs:
           Description: Logiciel de gestion de stock
            StockTout : produits, stock, caisse, achats, rapports. Hors-ligne.
           EOF
-          dpkg-deb --build $PKG ${{ env.APP_NAME }}-linux-x64-$VER-amd64.deb
-          ls -lh *.deb
+          dpkg-deb --build "$PKG" "${{ env.APP_NAME }}-linux-x64-$VER-amd64.deb"
+          ls -lh ./*.deb
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64
@@ -292,7 +292,7 @@ jobs:
           flutter build apk --release
           mv build/app/outputs/flutter-apk/app-release.apk \
             ${{ env.APP_NAME }}-android-$VER.apk
-          ls -lh *.apk
+          ls -lh ./*.apk
       # AAB (Play Store) uniquement si signature release disponible :
       # un AAB signe en debug est refuse par Google Play.
       - name: Build AAB (Play Store)
@@ -302,7 +302,7 @@ jobs:
           flutter build appbundle --release
           mv build/app/outputs/bundle/release/app-release.aab \
             ${{ env.APP_NAME }}-android-$VER.aab
-          ls -lh *.aab
+          ls -lh ./*.aab
       - uses: actions/upload-artifact@v4
         with:
           name: android
