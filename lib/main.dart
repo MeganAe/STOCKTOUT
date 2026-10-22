@@ -34,9 +34,40 @@ Future<void> main() async {
     });
   }
 
-  await AppDatabase.instance.init();
+  try {
+    await AppDatabase.instance.init();
+  } catch (e, st) {
+    // Affiche l'erreur au lieu de rester bloque sur le splashscreen.
+    runApp(_StartupError(error: '$e\n\n$st'));
+    return;
+  }
 
   runApp(const ProviderScope(child: StockToutApp()));
+}
+
+class _StartupError extends StatelessWidget {
+  const _StartupError({required this.error});
+  final String error;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: SingleChildScrollView(
+              child: SelectableText(
+                'Erreur au demarrage de StockTout :\n\n$error',
+                style: const TextStyle(fontSize: 12),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Recentre la fenetre dans l'ecran visible.
