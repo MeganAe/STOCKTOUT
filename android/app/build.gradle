@@ -13,7 +13,7 @@ if (keystoreFile.exists()) {
 
 android {
     namespace = "com.stocktout.stocktout"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
