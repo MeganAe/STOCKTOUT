@@ -178,6 +178,10 @@ class AppDatabase {
     return _db!.query('sales', orderBy: 'date DESC');
   }
 
+  Future<void> deleteSale(String id) async {
+    await _db!.delete('sales', where: 'id = ?', whereArgs: [id]);
+  }
+
   // ---------- Devises ----------
   Future<List<AppCurrency>> allCurrencies() async {
     final rows = await _db!.query('currencies', orderBy: 'code ASC');

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:uuid/uuid.dart';
 
 class SaleLine {
@@ -16,6 +18,15 @@ class SaleLine {
   });
 
   double get total => quantity * unitPrice - discount;
+
+  SaleLine copyWith({double? quantity, double? unitPrice, double? discount}) =>
+      SaleLine(
+        productId: productId,
+        productName: productName,
+        quantity: quantity ?? this.quantity,
+        unitPrice: unitPrice ?? this.unitPrice,
+        discount: discount ?? this.discount,
+      );
 
   Map<String, Object?> toMap() => {
         'product_id': productId,
@@ -63,6 +74,33 @@ class Sale {
     this.notes,
   })  : id = id ?? const Uuid().v4(),
         date = date ?? DateTime.now();
+
+  /// Reconstruit une vente depuis une ligne de la table `sales`.
+  factory Sale.fromRow(Map<String, Object?> r) {
+    var lines = <SaleLine>[];
+    try {
+      final raw = r['lines'] as String?;
+      if (raw != null && raw.isNotEmpty) {
+        lines = (jsonDecode(raw) as List)
+            .map((e) => SaleLine.fromMap(Map<String, Object?>.from(e as Map)))
+            .toList();
+      }
+    } catch (_) {}
+    return Sale(
+      id: r['id'] as String?,
+      number: '${r['number'] ?? ''}',
+      date: DateTime.tryParse('${r['date']}'),
+      customerId: r['customer_id'] as String?,
+      customerName: r['customer_name'] as String?,
+      lines: lines,
+      discount: (r['discount'] as num?)?.toDouble() ?? 0,
+      tax: (r['tax'] as num?)?.toDouble() ?? 0,
+      currency: r['currency'] as String? ?? 'USD',
+      rate: (r['rate'] as num?)?.toDouble() ?? 1,
+      paymentMethod: r['payment_method'] as String?,
+      notes: r['notes'] as String?,
+    );
+  }
 
   double get subTotal => lines.fold(0, (s, l) => s + l.total);
   double get total => subTotal - discount + tax;

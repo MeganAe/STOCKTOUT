@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n/app_localizations.dart';
+import '../../core/l10n/extra_strings.dart';
+import '../../core/models/sale.dart';
 import '../../core/providers/app_providers.dart';
 import '../../widgets/feature_tour.dart';
 
@@ -53,10 +55,24 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         .toList(growable: false);
                     final value =
                         products.fold<double>(0, (s, e) => s + e.stockValue);
+                    final now = DateTime.now();
+                    final todayTotal = (salesAsync.value ?? const [])
+                        .map(Sale.fromRow)
+                        .where((e) =>
+                            e.date.year == now.year &&
+                            e.date.month == now.month &&
+                            e.date.day == now.day)
+                        .fold<double>(0, (s, e) => s + e.total);
                     return Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: [
+                        _StatCard(
+                            title: t.todaySales,
+                            value: todayTotal.toStringAsFixed(2),
+                            subtitle: settings.currency,
+                            icon: Icons.payments,
+                            color: Colors.green),
                         _StatCard(
                             title: t.products,
                             value: '${products.length}',
@@ -116,9 +132,15 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       dense: true,
                                       leading: const Icon(Icons.receipt_long),
                                       title: Text('${s['number']}'),
-                                      subtitle: Text('${s['date']}'),
-                                      trailing:
-                                          Text('${s['customer_name'] ?? ''}'),
+                                      subtitle: Text(
+                                          '${s['date']}'.split('T').first),
+                                      trailing: Text(
+                                        Sale.fromRow(s)
+                                            .total
+                                            .toStringAsFixed(2),
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w600),
+                                      ),
                                     );
                                   }).toList(),
                                 );

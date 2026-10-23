@@ -10,9 +10,11 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../core/database/database.dart';
 import '../../core/l10n/app_localizations.dart';
+import '../../core/models/sale.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/services/report_service.dart';
 import '../../widgets/feature_tour.dart';
+import '../sales/sale_detail.dart';
 
 class ReportsPage extends ConsumerStatefulWidget {
   const ReportsPage({super.key});
@@ -141,12 +143,19 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                         if (sales.isEmpty) return Text(t.noSales);
                         return Column(
                           children: sales.take(20).map((s) {
+                            final sale = Sale.fromRow(s);
                             return ListTile(
                               dense: true,
                               leading: const Icon(Icons.receipt_long),
-                              title: Text('${s['number']}'),
-                              subtitle: Text('${s['currency'] ?? ''}'),
-                              trailing: Text('${s['date']}'.split('T').first),
+                              title: Text(sale.number),
+                              subtitle: Text(
+                                  sale.date.toIso8601String().split('T').first),
+                              trailing: Text(
+                                '${sale.total.toStringAsFixed(2)} ${sale.currency}',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.w600),
+                              ),
+                              onTap: () => showSaleDetail(context, ref, s),
                             );
                           }).toList(),
                         );
