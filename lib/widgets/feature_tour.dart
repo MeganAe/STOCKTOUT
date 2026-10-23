@@ -1,21 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/l10n/app_localizations.dart';
 
-/// Etat de la visite pour la session en cours.
-/// Chaque ecran ne montre ses astuces qu'une fois par lancement.
+/// Etat de la visite, sauvegarde sur l'appareil :
+/// chaque ecran ne montre ses astuces qu'une seule fois (premier usage).
 class TourSession {
   TourSession._();
 
+  static const _key = 'tour_shown';
   static final Set<String> _shown = {};
   static bool enabled = true;
 
+  /// A appeler au demarrage (avant runApp).
+  static Future<void> load() async {
+    final p = await SharedPreferences.getInstance();
+    enabled = p.getBool('tips_enabled') ?? true;
+    _shown
+      ..clear()
+      ..addAll(p.getStringList(_key) ?? const <String>[]);
+  }
+
   static bool shouldShow(String id) => enabled && !_shown.contains(id);
 
-  static void markShown(String id) => _shown.add(id);
+  static void markShown(String id) {
+    _shown.add(id);
+    _save();
+  }
 
   /// Utilise par Parametres pour rejouer la visite.
-  static void resetAll() => _shown.clear();
+  static void resetAll() {
+    _shown.clear();
+    _save();
+  }
+
+  static Future<void> _save() async {
+    final p = await SharedPreferences.getInstance();
+    await p.setStringList(_key, _shown.toList());
+  }
 }
 
 /// Une etape : une cible a l'ecran + un texte.

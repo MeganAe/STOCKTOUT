@@ -3,7 +3,10 @@ import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:path/path.dart' as pth;
+import 'package:path_provider/path_provider.dart';
 import 'package:printing/printing.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../core/database/database.dart';
 import '../../core/l10n/app_localizations.dart';
@@ -161,20 +164,38 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
   Future<void> _exportCsv(BuildContext context) async {
     final t = AppLocalizations.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final svc = ReportService(AppDatabase.instance);
-    final csv = await svc.productsCsv(t);
-    final path = await FilePicker.platform.saveFile(
-      dialogTitle: t.saveCsvTitle,
-      fileName: 'stock.csv',
-      type: FileType.custom,
-      allowedExtensions: ['csv'],
-    );
-    if (path != null) {
-      await File(path).writeAsString(csv);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(t.csvSaved(path))));
+    // BOM UTF-8 : Excel affiche correctement les accents.
+    final csv = '\uFEFF${await svc.productsCsv(t)}';
+    final d = DateTime.now();
+    final name =
+        'stock_${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}.csv';
+    try {
+      if (Platform.isAndroid || Platform.isIOS) {
+        // Mobile : ecrit dans le cache puis ouvre le partage
+        // (Enregistrer dans Fichiers, WhatsApp, e-mail, Drive...).
+        final dir = await getTemporaryDirectory();
+        final file = File(pth.join(dir.path, name));
+        await file.writeAsString(csv);
+        await Share.shareXFiles(
+          [XFile(file.path, mimeType: 'text/csv', name: name)],
+          subject: name,
+        );
+        return;
       }
+      final path = await FilePicker.platform.saveFile(
+        dialogTitle: t.saveCsvTitle,
+        fileName: name,
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+      );
+      if (path != null) {
+        await File(path).writeAsString(csv);
+        messenger.showSnackBar(SnackBar(content: Text(t.csvSaved(path))));
+      }
+    } catch (e) {
+      messenger.showSnackBar(SnackBar(content: Text('CSV : $e')));
     }
   }
 

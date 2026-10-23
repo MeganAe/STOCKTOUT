@@ -7,6 +7,7 @@ import 'package:window_manager/window_manager.dart';
 
 import 'app.dart';
 import 'core/database/database.dart';
+import 'widgets/feature_tour.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -36,6 +37,7 @@ Future<void> main() async {
 
   try {
     await AppDatabase.instance.init();
+    await TourSession.load();
   } catch (e, st) {
     // Affiche l'erreur au lieu de rester bloque sur le splashscreen.
     runApp(_StartupError(error: '$e\n\n$st'));
