@@ -27,6 +27,24 @@ const _xs = <String, Map<String, String>>{
   },
   'saleCancelled': {'en': 'Sale cancelled', 'fr': 'Vente annulée'},
   'todaySales': {'en': "Today's sales", 'fr': 'Ventes du jour'},
+  'currencyChangeTitle': {
+    'en': 'Change default currency',
+    'fr': 'Changer la devise par défaut',
+  },
+  'currencyChangeBody': {
+    'en': 'Saved prices are plain numbers: they are not converted automatically.',
+    'fr': 'Les prix déjà enregistrés sont de simples nombres : ils ne sont pas convertis automatiquement.',
+  },
+  'convertPrices': {'en': 'Convert prices', 'fr': 'Convertir les prix'},
+  'keepPrices': {
+    'en': 'Keep prices as they are',
+    'fr': 'Garder les prix tels quels',
+  },
+  'setRateFirst': {
+    'en': "To convert, first set the new currency's rate (pencil icon).",
+    'fr': "Pour convertir, renseignez d'abord le taux de la nouvelle devise (icône crayon).",
+  },
+  'pricesConverted': {'en': 'Prices converted', 'fr': 'Prix convertis'},
 };
 
 extension SalesStrings on AppLocalizations {
@@ -48,4 +66,10 @@ extension SalesStrings on AppLocalizations {
   String get cancelSaleAsk => _x('cancelSaleAsk');
   String get saleCancelled => _x('saleCancelled');
   String get todaySales => _x('todaySales');
+  String get currencyChangeTitle => _x('currencyChangeTitle');
+  String get currencyChangeBody => _x('currencyChangeBody');
+  String get convertPrices => _x('convertPrices');
+  String get keepPrices => _x('keepPrices');
+  String get setRateFirst => _x('setRateFirst');
+  String get pricesConverted => _x('pricesConverted');
 }

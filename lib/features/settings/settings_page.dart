@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/database/database.dart';
 import '../../core/l10n/app_localizations.dart';
+import '../../core/l10n/extra_strings.dart';
 import '../../core/models/currency.dart';
 import '../../core/providers/app_providers.dart';
 import '../../core/services/backup_service.dart';
@@ -180,9 +181,8 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
                                 children: [
                                   if (!isBase)
                                     TextButton(
-                                      onPressed: () => ref
-                                          .read(settingsProvider.notifier)
-                                          .setCurrency(c.code),
+                                      onPressed: () =>
+                                          _changeDefault(context, list, c),
                                       child: Text(t.defaultCurrency),
                                     ),
                                   IconButton(
@@ -371,6 +371,73 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
       await AppDatabase.instance.upsertCurrency(c.copyWith(
           rateToBase: double.tryParse(rate.text.replaceAll(',', '.')) ?? 1));
       ref.invalidate(currenciesProvider);
+    }
+  }
+
+  /// Changement de devise par defaut : propose de convertir les prix
+  /// enregistres selon les taux, au lieu de ne changer que le libelle.
+  Future<void> _changeDefault(
+    BuildContext context,
+    List<AppCurrency> all,
+    AppCurrency to,
+  ) async {
+    final t = AppLocalizations.of(context);
+    final current = ref.read(settingsProvider).currency;
+    AppCurrency? from;
+    for (final c in all) {
+      if (c.code == current) from = c;
+    }
+    final factor = (from == null || from.rateToBase == 0)
+        ? 1.0
+        : to.rateToBase / from.rateToBase;
+    final canConvert = (factor - 1).abs() > 1e-9;
+    String fmt(double v) => v >= 1
+        ? v.toStringAsFixed(v == v.roundToDouble() ? 0 : 2)
+        : v.toStringAsFixed(6);
+
+    final choice = await showDialog<String>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(t.currencyChangeTitle),
+        content: Text(canConvert
+            ? t.currencyChangeBody
+            : '${t.currencyChangeBody}\n\n${t.setRateFirst}'),
+        actionsOverflowDirection: VerticalDirection.down,
+        actions: [
+          if (canConvert)
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, 'convert'),
+              child: Text('${t.convertPrices} (×${fmt(factor)})'),
+            ),
+          OutlinedButton(
+            onPressed: () => Navigator.pop(ctx, 'keep'),
+            child: Text(t.keepPrices),
+          ),
+          if (!canConvert)
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, 'rate'),
+              child: Text('${t.edit} — ${t.rate}'),
+            ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(t.cancel),
+          ),
+        ],
+      ),
+    );
+    if (choice == null || !mounted) return;
+    if (choice == 'rate') {
+      await _editRate(context, to);
+      return;
+    }
+    if (choice == 'convert') {
+      await AppDatabase.instance.convertProductPrices(factor, to.decimals);
+      ref.invalidate(productsProvider);
+    }
+    await ref.read(settingsProvider.notifier).setCurrency(to.code);
+    if (choice == 'convert' && mounted) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(t.pricesConverted)));
     }
   }
 

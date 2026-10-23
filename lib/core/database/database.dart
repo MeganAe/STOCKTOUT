@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -122,6 +123,29 @@ class AppDatabase {
       p.toMap(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+  }
+
+  /// Multiplie tous les prix (achat et vente) par [factor], arrondis
+  /// selon les decimales de la nouvelle devise. Sert au changement de devise.
+  Future<void> convertProductPrices(double factor, int decimals) async {
+    final m = math.pow(10, decimals).toDouble();
+    double r(num v) => (v.toDouble() * factor * m).round() / m;
+    final rows =
+        await _db!.query('products', columns: ['id', 'buy_price', 'sell_price']);
+    final batch = _db!.batch();
+    for (final row in rows) {
+      batch.update(
+        'products',
+        {
+          'buy_price': r((row['buy_price'] as num?) ?? 0),
+          'sell_price': r((row['sell_price'] as num?) ?? 0),
+          'updated_at': DateTime.now().toIso8601String(),
+        },
+        where: 'id = ?',
+        whereArgs: [row['id']],
+      );
+    }
+    await batch.commit(noResult: true);
   }
 
   Future<void> deleteProduct(String id) async {
