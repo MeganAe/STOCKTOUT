@@ -23,9 +23,16 @@ class _TitleBarState extends State<TitleBar> with WindowListener {
   void initState() {
     super.initState();
     windowManager.addListener(this);
-    windowManager.isMaximized().then((v) {
+    _readMaximized();
+  }
+
+  /// Sans le plugin natif (tests, plateforme sans fenêtre) l'appel lève une
+  /// MissingPluginException : on l'ignore au lieu de la laisser remonter.
+  Future<void> _readMaximized() async {
+    try {
+      final v = await windowManager.isMaximized();
       if (mounted) setState(() => _maximized = v);
-    });
+    } catch (_) {}
   }
 
   @override
