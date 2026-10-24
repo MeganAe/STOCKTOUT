@@ -3,11 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/database/database.dart';
 import '../../core/l10n/app_localizations.dart';
+import '../../core/l10n/v5_strings.dart';
+import '../../core/logic/expiry.dart';
 import '../../core/models/product.dart';
 import '../../core/models/stock_movement.dart';
 import '../../core/providers/app_providers.dart';
 import '../../widgets/feature_tour.dart';
+import '../../widgets/product_thumb.dart';
+import 'import_page.dart';
 import 'product_dialog.dart';
+import 'scanner_page.dart';
 
 class ProductsPage extends ConsumerStatefulWidget {
   const ProductsPage({super.key});
@@ -44,6 +49,20 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
         appBar: AppBar(
           title: Text(t.products),
           actions: [
+            IconButton(
+              tooltip: t.scanBarcode,
+              icon: const Icon(Icons.qr_code_scanner),
+              onPressed: () => _scan(context, ref),
+            ),
+            IconButton(
+              tooltip: t.importProducts,
+              icon: const Icon(Icons.upload_file),
+              onPressed: () async {
+                await Navigator.of(context).push(MaterialPageRoute<void>(
+                    builder: (_) => const ImportPage()));
+                ref.invalidate(productsProvider);
+              },
+            ),
             Padding(
               padding: const EdgeInsets.only(right: 16),
               child: KeyedSubtree(
@@ -182,15 +201,78 @@ class _ProductsPageState extends ConsumerState<ProductsPage> {
             subtitle: Text(
                 '${p.sku} · ${t.quantity}: ${p.quantity.toStringAsFixed(0)} · '
                 '${p.sellPrice.toStringAsFixed(2)}'),
-            leading: p.isLowStock
-                ? const Icon(Icons.warning_amber, color: Colors.orange)
-                : const Icon(Icons.inventory_2_outlined),
+            leading: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                ProductThumb(
+                  path: p.imagePath,
+                  size: 44,
+                  fallback: p.isLowStock
+                      ? Icons.warning_amber
+                      : Icons.inventory_2_outlined,
+                ),
+                Positioned(
+                  right: -4,
+                  top: -4,
+                  child: _expiryDot(ref, p),
+                ),
+              ],
+            ),
             trailing: _actions(context, ref, t, p),
             onTap: () => _openEditor(context, ref, p),
           ),
         );
       },
     );
+  }
+
+  /// Pastille : rouge = périmé, orange = expire bientôt.
+  Widget _expiryDot(WidgetRef ref, Product p) {
+    final st = classifyExpiry(p.expiryDate, DateTime.now(),
+        soonDays: ref.read(settingsProvider).expiryDays);
+    if (st != ExpiryStatus.soon && st != ExpiryStatus.expired) {
+      return const SizedBox.shrink();
+    }
+    return Container(
+      width: 14,
+      height: 14,
+      decoration: BoxDecoration(
+        color: st == ExpiryStatus.expired ? Colors.red : Colors.orange,
+        shape: BoxShape.circle,
+        border: Border.all(color: Colors.white, width: 2),
+      ),
+    );
+  }
+
+  /// Scan : ouvre la fiche du produit trouvé, ou propose d'en créer un.
+  Future<void> _scan(BuildContext context, WidgetRef ref) async {
+    final all = await AppDatabase.instance.allProducts();
+    if (!context.mounted) return;
+    Product? found;
+    String? unknown;
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => ScannerPage(
+        products: all,
+        onProduct: (p) async {
+          found = p;
+          return true;
+        },
+        onUnknown: (code) async {
+          unknown = code;
+          Navigator.of(context).pop();
+        },
+      ),
+    ));
+    if (!context.mounted) return;
+    if (found != null) {
+      await _openEditor(context, ref, found);
+    } else if (unknown != null) {
+      final saved = await showDialog<bool>(
+        context: context,
+        builder: (_) => ProductDialog(initialBarcode: unknown),
+      );
+      if (saved == true) ref.invalidate(productsProvider);
+    }
   }
 
   Widget _actions(

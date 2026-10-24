@@ -5,9 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/l10n/app_localizations.dart';
+import '../core/l10n/v5_strings.dart';
 import '../features/about/about_page.dart';
 import '../features/automation/automation_page.dart';
 import '../features/dashboard/dashboard_page.dart';
+import '../features/debts/debts_page.dart';
+import '../features/expenses/expenses_page.dart';
 import '../features/inventory/inventory_page.dart';
 import '../features/onboarding/onboarding_page.dart';
 import '../features/partners/partners_page.dart';
@@ -45,6 +48,8 @@ class _AppShellState extends ConsumerState<AppShell> {
     ReportsPage(),
     AutomationPage(),
     SettingsPage(),
+    DebtsPage(),
+    ExpensesPage(),
   ];
 
   /// Index des 4 onglets principaux sur mobile.
@@ -154,6 +159,8 @@ class _AppShellState extends ConsumerState<AppShell> {
       (6, Icons.bar_chart_outlined, t.reports),
       (7, Icons.bolt_outlined, t.automations),
       (8, Icons.settings_outlined, t.settings),
+      (9, Icons.account_balance_wallet_outlined, t.debts),
+      (10, Icons.receipt_long_outlined, t.expenses),
     ];
     showModalBottomSheet(
       context: context,

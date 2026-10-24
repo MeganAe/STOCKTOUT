@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/l10n/app_localizations.dart';
+import '../core/l10n/v5_strings.dart';
 
 /// Menu lateral pliable : ouvert = icones + textes, ferme = icones seules.
 /// L'etat est memorise entre les lancements.
@@ -34,6 +35,8 @@ class _SideMenuState extends State<SideMenu> {
     Icons.bar_chart_outlined,
     Icons.bolt_outlined,
     Icons.settings_outlined,
+    Icons.account_balance_wallet_outlined,
+    Icons.receipt_long_outlined,
   ];
 
   static const _iconsSel = [
@@ -46,6 +49,8 @@ class _SideMenuState extends State<SideMenu> {
     Icons.bar_chart,
     Icons.bolt,
     Icons.settings,
+    Icons.account_balance_wallet,
+    Icons.receipt_long,
   ];
 
   @override
@@ -78,6 +83,8 @@ class _SideMenuState extends State<SideMenu> {
       t.reports,
       t.automations,
       t.settings,
+      t.debts,
+      t.expenses,
     ];
 
     return AnimatedContainer(

@@ -15,6 +15,7 @@ import '../../core/providers/app_providers.dart';
 import '../../core/services/report_service.dart';
 import '../../widgets/feature_tour.dart';
 import '../sales/sale_detail.dart';
+import 'stats_section.dart';
 
 class ReportsPage extends ConsumerStatefulWidget {
   const ReportsPage({super.key});
@@ -67,6 +68,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                 ],
               ),
             ),
+            const SizedBox(height: 20),
+            const StatsSection(),
             const SizedBox(height: 20),
             KeyedSubtree(
               key: kChart,

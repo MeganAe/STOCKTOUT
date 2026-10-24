@@ -9,23 +9,34 @@ class SaleLine {
   final double unitPrice;
   final double discount;
 
+  /// Coût d'achat UNITAIRE au moment de la vente (null pour les anciennes
+  /// ventes : on se rabat alors sur le prix d'achat actuel du produit).
+  final double? cost;
+
   const SaleLine({
     required this.productId,
     required this.productName,
     required this.quantity,
     required this.unitPrice,
     this.discount = 0,
+    this.cost,
   });
 
   double get total => quantity * unitPrice - discount;
 
-  SaleLine copyWith({double? quantity, double? unitPrice, double? discount}) =>
+  SaleLine copyWith({
+    double? quantity,
+    double? unitPrice,
+    double? discount,
+    double? cost,
+  }) =>
       SaleLine(
         productId: productId,
         productName: productName,
         quantity: quantity ?? this.quantity,
         unitPrice: unitPrice ?? this.unitPrice,
         discount: discount ?? this.discount,
+        cost: cost ?? this.cost,
       );
 
   Map<String, Object?> toMap() => {
@@ -34,6 +45,7 @@ class SaleLine {
         'quantity': quantity,
         'unit_price': unitPrice,
         'discount': discount,
+        if (cost != null) 'cost': cost,
       };
 
   factory SaleLine.fromMap(Map<String, Object?> m) => SaleLine(
@@ -42,6 +54,7 @@ class SaleLine {
         quantity: (m['quantity'] as num).toDouble(),
         unitPrice: (m['unit_price'] as num).toDouble(),
         discount: (m['discount'] as num?)?.toDouble() ?? 0,
+        cost: (m['cost'] as num?)?.toDouble(),
       );
 }
 
@@ -59,6 +72,10 @@ class Sale {
   final String? paymentMethod;
   final String? notes;
 
+  /// Montant payé au moment de la vente (null = colonne absente/ancienne
+  /// donnée : voir [paidAtSale]).
+  final double? paid;
+
   Sale({
     String? id,
     required this.number,
@@ -72,6 +89,7 @@ class Sale {
     this.rate = 1,
     this.paymentMethod,
     this.notes,
+    this.paid,
   })  : id = id ?? const Uuid().v4(),
         date = date ?? DateTime.now();
 
@@ -99,9 +117,22 @@ class Sale {
       rate: (r['rate'] as num?)?.toDouble() ?? 1,
       paymentMethod: r['payment_method'] as String?,
       notes: r['notes'] as String?,
+      paid: (r['paid'] as num?)?.toDouble(),
     );
   }
 
   double get subTotal => lines.fold(0, (s, l) => s + l.total);
   double get total => subTotal - discount + tax;
+
+  /// Remises accordées : remises de ligne + remise globale.
+  double get totalDiscounts =>
+      lines.fold<double>(0, (s, l) => s + l.discount) + discount;
+
+  /// Montant réellement payé à la vente. Règle de migration conservée :
+  /// ancienne vente non « credit » => payée en totalité ; « credit » => 0.
+  double get paidAtSale {
+    final v = paid;
+    if (v != null) return v;
+    return paymentMethod == 'credit' ? 0 : total;
+  }
 }

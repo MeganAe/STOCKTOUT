@@ -6,6 +6,7 @@ import 'core/l10n/app_localizations.dart';
 import 'core/providers/app_providers.dart';
 import 'core/theme/app_theme.dart';
 import 'widgets/app_shell.dart';
+import 'widgets/lock_gate.dart';
 
 class StockToutApp extends ConsumerWidget {
   const StockToutApp({super.key});
@@ -28,7 +29,7 @@ class StockToutApp extends ConsumerWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const AppShell(),
+      home: const LockGate(child: AppShell()),
     );
   }
 }

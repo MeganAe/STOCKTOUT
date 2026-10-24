@@ -15,6 +15,9 @@ class Product {
   final String? location;
   final DateTime? expiryDate;
   final String? notes;
+
+  /// Chemin du fichier photo (<documents>/stocktout/product_images/<id>.jpg).
+  final String? imagePath;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -33,6 +36,7 @@ class Product {
     this.location,
     this.expiryDate,
     this.notes,
+    this.imagePath,
     DateTime? createdAt,
     DateTime? updatedAt,
   })  : id = id ?? const Uuid().v4(),
@@ -58,6 +62,9 @@ class Product {
     String? location,
     DateTime? expiryDate,
     String? notes,
+    String? imagePath,
+    bool clearExpiry = false,
+    bool clearImage = false,
   }) {
     return Product(
       id: id,
@@ -72,8 +79,9 @@ class Product {
       minStock: minStock ?? this.minStock,
       supplierId: supplierId ?? this.supplierId,
       location: location ?? this.location,
-      expiryDate: expiryDate ?? this.expiryDate,
+      expiryDate: clearExpiry ? null : (expiryDate ?? this.expiryDate),
       notes: notes ?? this.notes,
+      imagePath: clearImage ? null : (imagePath ?? this.imagePath),
       createdAt: createdAt,
       updatedAt: DateTime.now(),
     );
@@ -94,6 +102,7 @@ class Product {
         'location': location,
         'expiry_date': expiryDate?.toIso8601String(),
         'notes': notes,
+        'image_path': imagePath,
         'created_at': createdAt.toIso8601String(),
         'updated_at': updatedAt.toIso8601String(),
       };
@@ -115,6 +124,7 @@ class Product {
             ? DateTime.tryParse(m['expiry_date'] as String)
             : null,
         notes: m['notes'] as String?,
+        imagePath: m['image_path'] as String?,
         createdAt: DateTime.tryParse(m['created_at'] as String? ?? '') ??
             DateTime.now(),
         updatedAt: DateTime.tryParse(m['updated_at'] as String? ?? '') ??

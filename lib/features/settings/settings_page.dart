@@ -1,4 +1,3 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,9 +7,9 @@ import '../../core/l10n/app_localizations.dart';
 import '../../core/l10n/extra_strings.dart';
 import '../../core/models/currency.dart';
 import '../../core/providers/app_providers.dart';
-import '../../core/services/backup_service.dart';
 import '../../widgets/feature_tour.dart';
 import '../onboarding/onboarding_page.dart';
+import 'v5_settings_cards.dart';
 
 class SettingsPage extends ConsumerStatefulWidget {
   const SettingsPage({super.key});
@@ -206,37 +205,11 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
             ),
             const SizedBox(height: 12),
             // ---- Sauvegarde ----
-            KeyedSubtree(
-              key: kBackup,
-              child: Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(t.backup, style: text.titleMedium),
-                      const SizedBox(height: 8),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          FilledButton.tonalIcon(
-                            icon: const Icon(Icons.save_alt),
-                            label: Text(t.backupBtn),
-                            onPressed: () => _backup(context),
-                          ),
-                          OutlinedButton.icon(
-                            icon: const Icon(Icons.restore),
-                            label: Text(t.restoreBtn),
-                            onPressed: () => _restore(context),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+            KeyedSubtree(key: kBackup, child: const BackupCard()),
+            const SizedBox(height: 12),
+            const SecurityCard(),
+            const SizedBox(height: 12),
+            const ExpiryCard(),
             const SizedBox(height: 12),
             // ---- Aide ----
             Card(
@@ -438,31 +411,6 @@ class _SettingsPageState extends ConsumerState<SettingsPage> {
     if (choice == 'convert' && mounted) {
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(t.pricesConverted)));
-    }
-  }
-
-  Future<void> _backup(BuildContext context) async {
-    final t = AppLocalizations.of(context);
-    final dir =
-        await FilePicker.platform.getDirectoryPath(dialogTitle: t.backupDir);
-    if (dir != null) {
-      final path = await BackupService().backup(dir);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(t.backupSaved(path))));
-      }
-    }
-  }
-
-  Future<void> _restore(BuildContext context) async {
-    final t = AppLocalizations.of(context);
-    final res = await FilePicker.platform.pickFiles(type: FileType.any);
-    if (res?.files.single.path != null) {
-      await BackupService().restore(res!.files.single.path!);
-      if (context.mounted) {
-        ScaffoldMessenger.of(context)
-            .showSnackBar(SnackBar(content: Text(t.restoreDone)));
-      }
     }
   }
 }

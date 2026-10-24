@@ -3,6 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/l10n/app_localizations.dart';
 import '../../core/l10n/extra_strings.dart';
+import '../../core/l10n/v5_strings.dart';
+import '../../core/logic/debts.dart';
+import '../../core/logic/money_format.dart';
+import '../../core/services/expiry_service.dart';
+import '../debts/debts_page.dart';
+import '../products/expiry_list.dart';
 import '../../core/models/currency.dart';
 import '../../core/models/sale.dart';
 import '../../core/providers/app_providers.dart';
@@ -57,8 +63,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                     final value =
                         products.fold<double>(0, (s, e) => s + e.stockValue);
                     final now = DateTime.now();
-                    final rates =
-                        ref.watch(currenciesProvider).value ?? const <AppCurrency>[];
+                    final rates = ref.watch(currenciesProvider).value ??
+                        const <AppCurrency>[];
                     double rateOf(String code) {
                       for (final c in rates) {
                         if (c.code == code && c.rateToBase != 0) {
@@ -81,10 +87,45 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                 e.total *
                                     rateOf(settings.currency) /
                                     rateOf(e.currency));
+                    final fmt = MoneyFmt(rates);
+                    final debts =
+                        ref.watch(debtsProvider).valueOrNull ?? const [];
+                    final report = buildExpiryReport(
+                        ref.watch(allProductsProvider).valueOrNull ?? products,
+                        now,
+                        soonDays: settings.expiryDays);
                     return Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: [
+                        GestureDetector(
+                          onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute<void>(
+                                  builder: (_) => const DebtsPage())),
+                          child: _StatCard(
+                              title: t.debts,
+                              value: fmt(totalDebt(debts), settings.currency),
+                              subtitle: t.debtors(debts.length),
+                              icon: Icons.account_balance_wallet_outlined,
+                              color: Colors.deepOrange),
+                        ),
+                        GestureDetector(
+                          onTap: () => showExpiryList(context, expired: false),
+                          child: _StatCard(
+                              title: t.expiringSoon,
+                              value: '${report.soon.length}',
+                              subtitle: t.withinDays(settings.expiryDays),
+                              icon: Icons.schedule,
+                              color: Colors.orange),
+                        ),
+                        GestureDetector(
+                          onTap: () => showExpiryList(context, expired: true),
+                          child: _StatCard(
+                              title: t.expired,
+                              value: '${report.expired.length}',
+                              icon: Icons.error_outline,
+                              color: Colors.red),
+                        ),
                         _StatCard(
                             title: t.todaySales,
                             value: todayTotal.toStringAsFixed(2),
@@ -150,8 +191,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                                       dense: true,
                                       leading: const Icon(Icons.receipt_long),
                                       title: Text('${s['number']}'),
-                                      subtitle: Text(
-                                          '${s['date']}'.split('T').first),
+                                      subtitle:
+                                          Text('${s['date']}'.split('T').first),
                                       trailing: Text(
                                         Sale.fromRow(s)
                                             .total

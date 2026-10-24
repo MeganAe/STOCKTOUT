@@ -9,12 +9,20 @@ import 'package:uuid/uuid.dart';
 import '../../core/database/database.dart';
 import '../../core/l10n/app_localizations.dart';
 import '../../core/l10n/extra_strings.dart';
+import '../../core/logic/debts.dart';
+import '../../core/logic/expiry.dart';
+import '../../core/logic/product_lookup.dart';
+import '../../core/l10n/v5_strings.dart';
 import '../../core/models/automation.dart';
 import '../../core/models/product.dart';
 import '../../core/models/sale.dart';
 import '../../core/models/stock_movement.dart';
 import '../../core/providers/app_providers.dart';
+import '../../widgets/customer_picker.dart';
 import '../../widgets/feature_tour.dart';
+import '../../widgets/product_thumb.dart';
+import '../products/product_dialog.dart';
+import '../products/scanner_page.dart';
 import 'sale_detail.dart';
 
 /// Moyens de paiement : code stable en base, libelle traduit a l'ecran.
@@ -34,6 +42,9 @@ class _SalesPageState extends ConsumerState<SalesPage> {
   final _discount = TextEditingController();
   final _received = TextEditingController();
   final _customer = TextEditingController();
+  final _paidNow = TextEditingController();
+  String? _customerId;
+  final Set<String> _expiredOk = {};
   bool _discountPercent = false;
   String _payment = 'cash';
   String? _notice;
@@ -48,6 +59,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
     _discount.dispose();
     _received.dispose();
     _customer.dispose();
+    _paidNow.dispose();
     super.dispose();
   }
 
@@ -60,7 +72,8 @@ class _SalesPageState extends ConsumerState<SalesPage> {
     _sheetSet?.call(() {});
   }
 
-  static double _parse(String v) => double.tryParse(v.replaceAll(',', '.')) ?? 0;
+  static double _parse(String v) =>
+      double.tryParse(v.replaceAll(',', '.')) ?? 0;
 
   double get _subTotal => _cart.fold(0, (s, e) => s + e.total);
 
@@ -74,9 +87,9 @@ class _SalesPageState extends ConsumerState<SalesPage> {
 
   double get _total => _subTotal - _discountValue;
 
-  Product? _product(String id) => (ref.read(productsProvider).value ??
-          const <Product>[])
-      .firstWhereOrNull((e) => e.id == id);
+  Product? _product(String id) =>
+      (ref.read(productsProvider).value ?? const <Product>[])
+          .firstWhereOrNull((e) => e.id == id);
 
   static String _q(double q) =>
       q == q.roundToDouble() ? q.toInt().toString() : q.toStringAsFixed(2);
@@ -94,7 +107,16 @@ class _SalesPageState extends ConsumerState<SalesPage> {
         TourStep(target: kTotals, title: t.gsTotals, body: t.gsTotalsB),
       ],
       child: Scaffold(
-        appBar: AppBar(title: Text(t.sales)),
+        appBar: AppBar(
+          title: Text(t.sales),
+          actions: [
+            IconButton(
+              tooltip: t.scanBarcode,
+              icon: const Icon(Icons.qr_code_scanner),
+              onPressed: _openScanner,
+            ),
+          ],
+        ),
         body: productsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(child: Text('$e')),
@@ -144,7 +166,18 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                 hintText: t.search,
                 prefixIcon: const Icon(Icons.search),
               ),
+              textInputAction: TextInputAction.search,
               onChanged: (_) => setState(() {}),
+              // Lecteur de codes-barres USB/Bluetooth : il « tape » le code
+              // puis Entrée -> ajout direct au panier si le code est exact.
+              onSubmitted: (v) {
+                final hit = findProductByCode(products, v);
+                if (hit != null) {
+                  _search.clear();
+                  _addToCart(hit);
+                  setState(() {});
+                }
+              },
             ),
           ),
         ),
@@ -171,13 +204,33 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(p.name,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.w600)),
-                              Text(p.sku,
-                                  style: Theme.of(context).textTheme.bodySmall),
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Text(p.name,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                            fontWeight: FontWeight.w600)),
+                                  ),
+                                  if (p.imagePath != null) ...[
+                                    const SizedBox(width: 6),
+                                    ProductThumb(path: p.imagePath, size: 34),
+                                  ],
+                                ],
+                              ),
+                              Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(p.sku,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall),
+                                  ),
+                                  _expiryBadge(p),
+                                ],
+                              ),
                               const Spacer(),
                               Row(
                                 mainAxisAlignment:
@@ -275,8 +328,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                               SegmentedButton<bool>(
                                 showSelectedIcon: false,
                                 segments: [
-                                  ButtonSegment(
-                                      value: false, label: Text(cur)),
+                                  ButtonSegment(value: false, label: Text(cur)),
                                   const ButtonSegment(
                                       value: true, label: Text('%')),
                                 ],
@@ -317,6 +369,16 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                                   prefixIcon: const Icon(Icons.attach_money),
                                 ),
                               ),
+                              if (received > 0 && received < _total)
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Text(
+                                    t.partialDebtHint(
+                                        (_total - received).toStringAsFixed(2)),
+                                    style:
+                                        const TextStyle(color: Colors.orange),
+                                  ),
+                                ),
                               if (received > 0)
                                 Padding(
                                   padding: const EdgeInsets.only(top: 6),
@@ -340,13 +402,48 @@ class _SalesPageState extends ConsumerState<SalesPage> {
                                   ),
                                 ),
                             ],
+                            if (_payment == 'credit') ...[
+                              const SizedBox(height: 10),
+                              TextField(
+                                controller: _paidNow,
+                                keyboardType:
+                                    const TextInputType.numberWithOptions(
+                                        decimal: true),
+                                inputFormatters: [
+                                  FilteringTextInputFormatter.allow(
+                                      RegExp(r'[0-9.,]')),
+                                ],
+                                onChanged: (_) => _refresh(),
+                                decoration: InputDecoration(
+                                  labelText: t.paidNow,
+                                  prefixIcon: const Icon(Icons.attach_money),
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 10),
-                            TextField(
-                              controller: _customer,
-                              textCapitalization: TextCapitalization.words,
-                              decoration: InputDecoration(
-                                labelText: t.customerName,
-                                prefixIcon: const Icon(Icons.person_outline),
+                            InkWell(
+                              borderRadius: BorderRadius.circular(12),
+                              onTap: _pickCustomer,
+                              child: InputDecorator(
+                                decoration: InputDecoration(
+                                  labelText: t.customerName,
+                                  prefixIcon: const Icon(Icons.person_outline),
+                                  suffixIcon: _customerId == null
+                                      ? const Icon(Icons.arrow_drop_down)
+                                      : IconButton(
+                                          icon: const Icon(Icons.close),
+                                          onPressed: () => _refresh(() {
+                                            _customerId = null;
+                                            _customer.clear();
+                                          }),
+                                        ),
+                                ),
+                                child: Text(
+                                  _customer.text.isEmpty
+                                      ? t.chooseCustomer
+                                      : _customer.text,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -521,7 +618,8 @@ class _SalesPageState extends ConsumerState<SalesPage> {
         builder: (ctx, setSheet) {
           _sheetSet = setSheet;
           return Padding(
-            padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+            padding:
+                EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
             child: DraggableScrollableSheet(
               expand: false,
               initialChildSize: 0.85,
@@ -537,15 +635,81 @@ class _SalesPageState extends ConsumerState<SalesPage> {
 
   void _warnStock(Product p) {
     final t = AppLocalizations.of(context);
-    final msg =
-        '${t.notEnoughStock} : ${p.name} (${_q(p.quantity)})';
+    final msg = '${t.notEnoughStock} : ${p.name} (${_q(p.quantity)})';
     _refresh(() => _notice = msg);
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
       ..showSnackBar(SnackBar(content: Text(msg)));
   }
 
-  void _addToCart(Product p) {
+  Widget _expiryBadge(Product p) {
+    final st = classifyExpiry(p.expiryDate, DateTime.now(),
+        soonDays: ref.read(settingsProvider).expiryDays);
+    if (st != ExpiryStatus.soon && st != ExpiryStatus.expired) {
+      return const SizedBox.shrink();
+    }
+    return Icon(
+      st == ExpiryStatus.expired ? Icons.error : Icons.schedule,
+      size: 16,
+      color: st == ExpiryStatus.expired ? Colors.red : Colors.orange,
+    );
+  }
+
+  Future<void> _pickCustomer() async {
+    final c = await pickCustomer(context);
+    if (c != null) {
+      _refresh(() {
+        _customerId = c.id;
+        _customer.text = c.name;
+      });
+    }
+  }
+
+  Future<void> _openScanner() async {
+    final products = await AppDatabase.instance.allProducts();
+    if (!mounted) return;
+    await Navigator.of(context).push(MaterialPageRoute<void>(
+      builder: (_) => ScannerPage(
+        continuous: true,
+        products: products,
+        onProduct: (p) async {
+          await _addToCart(p);
+          return true;
+        },
+        onUnknown: (code) async {
+          final saved = await showDialog<bool>(
+            context: context,
+            builder: (_) => ProductDialog(initialBarcode: code),
+          );
+          if (saved == true) ref.invalidate(productsProvider);
+        },
+      ),
+    ));
+  }
+
+  Future<void> _addToCart(Product p) async {
+    final t = AppLocalizations.of(context);
+    if (classifyExpiry(p.expiryDate, DateTime.now()) == ExpiryStatus.expired &&
+        !_expiredOk.contains(p.id)) {
+      final ok = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          icon: const Icon(Icons.error, color: Colors.red),
+          title: Text(t.expiredSaleTitle),
+          content: Text(t.expiredSaleBody(p.name)),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(t.cancel)),
+            FilledButton(
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(t.sellAnyway)),
+          ],
+        ),
+      );
+      if (ok != true || !mounted) return;
+      _expiredOk.add(p.id);
+    }
     final i = _cart.indexWhere((e) => e.productId == p.id);
     final current = i >= 0 ? _cart[i].quantity : 0.0;
     if (current + 1 > p.quantity) {
@@ -561,6 +725,8 @@ class _SalesPageState extends ConsumerState<SalesPage> {
           productName: p.name,
           quantity: 1,
           unitPrice: p.sellPrice,
+          // Coût d'achat figé à la vente : sert au calcul du bénéfice.
+          cost: p.buyPrice,
         ));
       }
     });
@@ -594,7 +760,16 @@ class _SalesPageState extends ConsumerState<SalesPage> {
     final t = AppLocalizations.of(context);
     final settings = ref.read(settingsProvider);
     final customer = _customer.text.trim();
-    if (_payment == 'credit' && customer.isEmpty) {
+    final total = _total;
+    var paid = total;
+    if (_payment == 'credit') {
+      paid = _parse(_paidNow.text).clamp(0.0, total).toDouble();
+    } else if (_payment == 'cash') {
+      final r = _parse(_received.text);
+      if (r > 0 && r < total) paid = r;
+    }
+    // Une vente non soldée crée une dette : un client est obligatoire.
+    if (paid < total - kMoneyEps && (_customerId == null || customer.isEmpty)) {
       _refresh(() => _notice = t.customerRequired);
       return;
     }
@@ -608,7 +783,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
       'id': const Uuid().v4(),
       'number': number,
       'date': DateTime.now().toIso8601String(),
-      'customer_id': null,
+      'customer_id': _customerId,
       'customer_name': customer,
       'lines': linesJson,
       'discount': discount,
@@ -617,6 +792,7 @@ class _SalesPageState extends ConsumerState<SalesPage> {
       'rate': 1,
       'payment_method': _payment,
       'notes': '',
+      'paid': paid,
     };
     await AppDatabase.instance.insertSale(row);
 
@@ -649,10 +825,14 @@ class _SalesPageState extends ConsumerState<SalesPage> {
       _discount.clear();
       _received.clear();
       _customer.clear();
+      _paidNow.clear();
+      _customerId = null;
+      _expiredOk.clear();
       _discountPercent = false;
     });
     ref.invalidate(productsProvider);
     ref.invalidate(salesProvider);
+    ref.invalidate(debtsProvider);
     if (sheetWasOpen) Navigator.of(context).pop();
     ScaffoldMessenger.of(context)
       ..clearSnackBars()
@@ -722,8 +902,8 @@ class _LineEditDialogState extends State<_LineEditDialog> {
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]'))],
       onChanged: (_) => setState(() {}),
-      onTap: () =>
-          c.selection = TextSelection(baseOffset: 0, extentOffset: c.text.length),
+      onTap: () => c.selection =
+          TextSelection(baseOffset: 0, extentOffset: c.text.length),
       decoration: InputDecoration(labelText: label),
     );
   }

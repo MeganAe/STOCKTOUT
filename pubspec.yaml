@@ -31,6 +31,14 @@ dependencies:
   window_manager: ^0.3.8
   package_info_plus: ^8.0.0
   share_plus: ^10.1.2
+  # --- V5 ---
+  archive: ^3.6.1 # sauvegardes .zip (déjà présent dans pubspec.lock via excel)
+  crypto: ^3.0.3 # hash SHA-256 du code PIN (déjà présent dans pubspec.lock)
+  image_picker: ^1.1.2 # photos des produits (caméra / galerie)
+  mobile_scanner: ^5.2.3 # scan de codes-barres à la caméra
+  local_auth: ^2.3.0 # empreinte digitale (optionnelle) pour le code PIN
+  flutter_local_notifications: ^17.2.2 # notification quotidienne de péremption
+  app_settings: ^5.1.1 # bouton « ouvrir les réglages » si permission refusée
 
 dev_dependencies:
   flutter_test:

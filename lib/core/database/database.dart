@@ -5,11 +5,17 @@ import 'dart:math' as math;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:uuid/uuid.dart';
 
+import '../logic/import_logic.dart';
 import '../models/automation.dart';
 import '../models/currency.dart';
+import '../models/expense.dart';
+import '../models/payment.dart';
 import '../models/product.dart';
+import '../models/sale.dart';
 import '../models/stock_movement.dart';
+import 'schema.dart';
 
 /// Base SQLite locale. Aucun serveur requis.
 /// Fichier : <documents>/stocktout/stocktout.db
@@ -20,70 +26,101 @@ class AppDatabase {
   Database? _db;
   Database get db => _db!;
 
-  Future<void> init() async {
+  /// Dossier de données : <documents>/stocktout
+  Future<Directory> dataDir() async {
     final dir = await getApplicationDocumentsDirectory();
     final folder = Directory(p.join(dir.path, 'stocktout'));
     if (!await folder.exists()) await folder.create(recursive: true);
-    final path = p.join(folder.path, 'stocktout.db');
+    return folder;
+  }
+
+  Future<String> dbFilePath() async =>
+      p.join((await dataDir()).path, 'stocktout.db');
+
+  /// Dossier des photos produits : <documents>/stocktout/product_images
+  Future<Directory> imagesDir() async {
+    final d = Directory(p.join((await dataDir()).path, 'product_images'));
+    if (!await d.exists()) await d.create(recursive: true);
+    return d;
+  }
+
+  Future<void> init() async {
+    final path = await dbFilePath();
     _db = await databaseFactory.openDatabase(
       path,
       options: OpenDatabaseOptions(
-        version: 1,
+        version: kDbVersion,
         onCreate: _create,
+        onUpgrade: _upgrade,
       ),
     );
     await _seed();
   }
 
+  /// Ferme la base (avant restauration / réinitialisation).
+  Future<void> close() async {
+    await _db?.close();
+    _db = null;
+  }
+
+  /// Nouvelle installation : schéma d'origine puis migration v2, pour
+  /// obtenir exactement le même schéma final qu'une mise à jour.
   Future<void> _create(Database db, int version) async {
-    await db.execute('''
-      CREATE TABLE products(
-        id TEXT PRIMARY KEY, sku TEXT, name TEXT NOT NULL,
-        barcode TEXT, category TEXT, unit TEXT,
-        buy_price REAL DEFAULT 0, sell_price REAL DEFAULT 0,
-        quantity REAL DEFAULT 0, min_stock REAL DEFAULT 0,
-        supplier_id TEXT, location TEXT, expiry_date TEXT,
-        notes TEXT, created_at TEXT, updated_at TEXT
-      )''');
-    await db.execute('''
-      CREATE TABLE movements(
-        id TEXT PRIMARY KEY, product_id TEXT NOT NULL,
-        type TEXT, quantity REAL, unit_price REAL,
-        reason TEXT, reference TEXT, date TEXT
-      )''');
-    await db.execute('''
-      CREATE TABLE sales(
-        id TEXT PRIMARY KEY, number TEXT, date TEXT,
-        customer_id TEXT, customer_name TEXT,
-        lines TEXT, discount REAL DEFAULT 0, tax REAL DEFAULT 0,
-        currency TEXT, rate REAL DEFAULT 1,
-        payment_method TEXT, notes TEXT
-      )''');
-    await db.execute('''
-      CREATE TABLE purchases(
-        id TEXT PRIMARY KEY, number TEXT, date TEXT,
-        supplier_id TEXT, supplier_name TEXT,
-        lines TEXT, status TEXT DEFAULT 'draft',
-        currency TEXT, rate REAL DEFAULT 1, notes TEXT
-      )''');
-    await db.execute('''
-      CREATE TABLE partners(
-        id TEXT PRIMARY KEY, kind TEXT, name TEXT NOT NULL,
-        phone TEXT, email TEXT, address TEXT, notes TEXT
-      )''');
-    await db.execute('''
-      CREATE TABLE currencies(
-        code TEXT PRIMARY KEY, symbol TEXT, name TEXT,
-        decimals INTEGER DEFAULT 2, rate REAL DEFAULT 1
-      )''');
-    await db.execute('''
-      CREATE TABLE automations(
-        id TEXT PRIMARY KEY, name TEXT, description TEXT,
-        trigger TEXT, actions TEXT, enabled INTEGER DEFAULT 1
-      )''');
-    await db.execute('''
-      CREATE TABLE settings(key TEXT PRIMARY KEY, value TEXT)
-    ''');
+    for (final sql in kSchemaV1) {
+      await db.execute(sql);
+    }
+    await migrateToV2(db);
+  }
+
+  /// Mise à jour : AUCUNE suppression, uniquement des ajouts.
+  Future<void> _upgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion < 2) await migrateToV2(db);
+  }
+
+  /// Migration v1 -> v2 (idempotente, ne supprime rien).
+  Future<void> migrateToV2(DatabaseExecutor db) async {
+    for (final c in kAddedColumnsV2) {
+      final info = await db.rawQuery('PRAGMA table_info(${c[0]})');
+      final has = info.any((r) => r['name'] == c[1]);
+      if (!has)
+        await db.execute('ALTER TABLE ${c[0]} ADD COLUMN ${c[1]} ${c[2]}');
+    }
+    for (final sql in kMigrationV2) {
+      await db.execute(sql);
+    }
+    // Ventes existantes : non « credit » => payées en totalité,
+    // « credit » => 0 payé (le total vient des lignes JSON).
+    final rows = await db.query('sales');
+    for (final r in rows) {
+      if (r['paid'] != null) continue;
+      final sale = Sale.fromRow(r);
+      final paid = sale.paymentMethod == 'credit' ? 0.0 : sale.total;
+      await db.update('sales', {'paid': paid},
+          where: 'id = ?', whereArgs: [r['id']]);
+    }
+  }
+
+  /// Copie COHÉRENTE de la base vers [destPath] (VACUUM INTO) : jamais une
+  /// copie brute d'un fichier en cours d'écriture. [destPath] ne doit pas
+  /// exister.
+  Future<void> snapshotTo(String destPath) async {
+    final f = File(destPath);
+    if (await f.exists()) await f.delete();
+    final lit = destPath.replaceAll("'", "''");
+    await _db!.execute("VACUUM INTO '$lit'");
+  }
+
+  /// Efface TOUTES les données (base + photos) et repart d'une base neuve.
+  Future<void> resetAll() async {
+    await close();
+    final path = await dbFilePath();
+    for (final suffix in ['', '-wal', '-shm', '-journal']) {
+      final f = File('$path$suffix');
+      if (await f.exists()) await f.delete();
+    }
+    final imgs = Directory(p.join((await dataDir()).path, 'product_images'));
+    if (await imgs.exists()) await imgs.delete(recursive: true);
+    await init();
   }
 
   Future<void> _seed() async {
@@ -130,8 +167,8 @@ class AppDatabase {
   Future<void> convertProductPrices(double factor, int decimals) async {
     final m = math.pow(10, decimals).toDouble();
     double r(num v) => (v.toDouble() * factor * m).round() / m;
-    final rows =
-        await _db!.query('products', columns: ['id', 'buy_price', 'sell_price']);
+    final rows = await _db!
+        .query('products', columns: ['id', 'buy_price', 'sell_price']);
     final batch = _db!.batch();
     for (final row in rows) {
       batch.update(
@@ -149,7 +186,50 @@ class AppDatabase {
   }
 
   Future<void> deleteProduct(String id) async {
+    final rows = await _db!.query('products',
+        columns: ['image_path'], where: 'id = ?', whereArgs: [id]);
     await _db!.delete('products', where: 'id = ?', whereArgs: [id]);
+    // Supprime aussi la photo du produit.
+    final img = rows.isEmpty ? null : rows.first['image_path'] as String?;
+    if (img != null && img.isNotEmpty) {
+      try {
+        final f = File(img);
+        if (await f.exists()) await f.delete();
+      } catch (_) {}
+    }
+  }
+
+  /// Import par lots dans UNE transaction. [onProgress] reçoit (fait, total).
+  Future<void> applyImport(
+    ImportPlan plan, {
+    void Function(int done, int total)? onProgress,
+  }) async {
+    final total = plan.toCreate.length + plan.toUpdate.length;
+    var done = 0;
+    const chunk = 400;
+    await _db!.transaction((txn) async {
+      Future<void> run(List<Product> list, bool create) async {
+        for (var i = 0; i < list.length; i += chunk) {
+          final batch = txn.batch();
+          for (final pr in list.skip(i).take(chunk)) {
+            if (create) {
+              batch.insert('products', pr.toMap());
+            } else {
+              batch.update('products', pr.toMap(),
+                  where: 'id = ?', whereArgs: [pr.id]);
+            }
+          }
+          await batch.commit(noResult: true);
+          done += list.skip(i).take(chunk).length;
+          onProgress?.call(done, total);
+          // Laisse respirer l'interface entre deux lots.
+          await Future<void>.delayed(Duration.zero);
+        }
+      }
+
+      await run(plan.toCreate, true);
+      await run(plan.toUpdate, false);
+    });
   }
 
   Future<void> addMovement(StockMovement m) async {
@@ -202,8 +282,77 @@ class AppDatabase {
     return _db!.query('sales', orderBy: 'date DESC');
   }
 
+  /// Supprime la vente ET ses paiements liés.
   Future<void> deleteSale(String id) async {
-    await _db!.delete('sales', where: 'id = ?', whereArgs: [id]);
+    await _db!.transaction((txn) async {
+      await txn.delete('payments', where: 'sale_id = ?', whereArgs: [id]);
+      await txn.delete('sales', where: 'id = ?', whereArgs: [id]);
+    });
+  }
+
+  Future<int> paymentCountForSale(String saleId) async {
+    final r = await _db!.rawQuery(
+        'SELECT COUNT(*) AS n FROM payments WHERE sale_id = ?', [saleId]);
+    return (r.first['n'] as num?)?.toInt() ?? 0;
+  }
+
+  // ---------- Paiements (dettes clients) ----------
+  Future<List<Payment>> allPayments() async {
+    final rows = await _db!.query('payments', orderBy: 'date DESC');
+    return rows.map(Payment.fromMap).toList();
+  }
+
+  Future<void> insertPayments(List<Payment> list) async {
+    await _db!.transaction((txn) async {
+      for (final pay in list) {
+        await txn.insert('payments', pay.toMap());
+      }
+    });
+  }
+
+  // ---------- Dépenses ----------
+  Future<List<Expense>> allExpenses() async {
+    final rows = await _db!.query('expenses', orderBy: 'date DESC');
+    return rows.map(Expense.fromMap).toList();
+  }
+
+  Future<void> upsertExpense(Expense e) async {
+    await _db!.insert('expenses', e.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<void> deleteExpense(String id) async {
+    await _db!.delete('expenses', where: 'id = ?', whereArgs: [id]);
+  }
+
+  // ---------- Clients ----------
+  /// Clients (kind = 'customer'), filtrés par nom ou téléphone.
+  Future<List<Map<String, Object?>>> customers({String query = ''}) async {
+    final rows = await _db!.query('partners',
+        where: 'kind = ?', whereArgs: ['customer'], orderBy: 'name ASC');
+    if (query.trim().isEmpty) return rows;
+    final q = query.trim().toLowerCase();
+    return rows
+        .where((r) =>
+            '${r['name']}'.toLowerCase().contains(q) ||
+            '${r['phone'] ?? ''}'.toLowerCase().contains(q))
+        .toList();
+  }
+
+  /// Crée un client à la volée et retourne sa ligne.
+  Future<Map<String, Object?>> createCustomer(String name,
+      {String? phone}) async {
+    final row = <String, Object?>{
+      'id': const Uuid().v4(),
+      'kind': 'customer',
+      'name': name.trim(),
+      'phone': phone?.trim(),
+      'email': null,
+      'address': null,
+      'notes': null,
+    };
+    await _db!.insert('partners', row);
+    return row;
   }
 
   // ---------- Devises ----------

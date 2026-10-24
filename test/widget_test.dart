@@ -30,6 +30,10 @@ void main() {
     await tester.runAsync(() => AppDatabase.instance.init());
 
     await tester.pumpWidget(const ProviderScope(child: StockToutApp()));
+    // L'écran de verrouillage lit la base (E/S réelles) : on lui laisse
+    // le temps de répondre hors de la fausse horloge des tests.
+    await tester.runAsync(
+        () => Future<void>.delayed(const Duration(milliseconds: 500)));
     for (var i = 0; i < 5; i++) {
       await tester.pump(const Duration(milliseconds: 200));
     }
