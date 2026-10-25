@@ -113,6 +113,9 @@ class _LockGateState extends ConsumerState<LockGate>
       final minutes = await PinService().autoLockMinutes();
       if (!mounted) return;
       if (shouldAutoLock(since, DateTime.now(), minutes)) {
+        // Ferme les dialogues et pages ouverts : sinon ils resteraient
+        // visibles AU-DESSUS de l'écran de verrouillage.
+        Navigator.of(context).popUntil((r) => r.isFirst);
         ref.read(lockProvider.notifier).lock();
       }
     }
