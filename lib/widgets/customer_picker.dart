@@ -13,17 +13,24 @@ class CustomerChoice {
 
 /// Feuille de sélection d'un client : recherche par nom/téléphone et
 /// création rapide. Retourne null si l'utilisateur ferme la feuille.
-Future<CustomerChoice?> pickCustomer(BuildContext context) {
+Future<CustomerChoice?> pickCustomer(BuildContext context) =>
+    pickPartner(context, kind: 'customer');
+
+/// Même feuille pour les fournisseurs : [kind] = 'customer' ou 'supplier'
+/// (valeurs de la colonne `partners.kind`).
+Future<CustomerChoice?> pickPartner(BuildContext context,
+    {String kind = 'customer'}) {
   return showModalBottomSheet<CustomerChoice>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    builder: (_) => const _CustomerSheet(),
+    builder: (_) => _CustomerSheet(kind: kind),
   );
 }
 
 class _CustomerSheet extends StatefulWidget {
-  const _CustomerSheet();
+  final String kind;
+  const _CustomerSheet({required this.kind});
 
   @override
   State<_CustomerSheet> createState() => _CustomerSheetState();
@@ -47,7 +54,8 @@ class _CustomerSheetState extends State<_CustomerSheet> {
   }
 
   Future<void> _load() async {
-    final rows = await AppDatabase.instance.customers(query: _q.text);
+    final rows =
+        await AppDatabase.instance.partnersOfKind(widget.kind, query: _q.text);
     if (!mounted) return;
     setState(() {
       _rows = rows;
@@ -62,7 +70,7 @@ class _CustomerSheetState extends State<_CustomerSheet> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(t.newCustomer),
+        title: Text(widget.kind == 'supplier' ? t.newSupplier : t.newCustomer),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -70,7 +78,7 @@ class _CustomerSheetState extends State<_CustomerSheet> {
               controller: name,
               autofocus: true,
               textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(labelText: t.customerNameLabel),
+              decoration: InputDecoration(labelText: t.contactName),
             ),
             const SizedBox(height: 8),
             TextField(
@@ -91,7 +99,8 @@ class _CustomerSheetState extends State<_CustomerSheet> {
     );
     final n = name.text.trim();
     if (ok != true || n.isEmpty) return;
-    final row = await AppDatabase.instance.createCustomer(n, phone: phone.text);
+    final row = await AppDatabase.instance
+        .createPartner(widget.kind, n, phone: phone.text);
     if (!mounted) return;
     Navigator.pop(context, CustomerChoice(row['id'] as String, n));
   }
@@ -111,7 +120,9 @@ class _CustomerSheetState extends State<_CustomerSheet> {
               child: TextField(
                 controller: _q,
                 decoration: InputDecoration(
-                  hintText: t.searchCustomer,
+                  hintText: widget.kind == 'supplier'
+                      ? t.searchSupplier
+                      : t.searchCustomer,
                   prefixIcon: const Icon(Icons.search),
                 ),
                 onChanged: (_) => _load(),
@@ -119,7 +130,8 @@ class _CustomerSheetState extends State<_CustomerSheet> {
             ),
             ListTile(
               leading: const CircleAvatar(child: Icon(Icons.person_add_alt_1)),
-              title: Text(t.newCustomer),
+              title: Text(
+                  widget.kind == 'supplier' ? t.newSupplier : t.newCustomer),
               onTap: _create,
             ),
             const Divider(height: 1),
@@ -127,7 +139,10 @@ class _CustomerSheetState extends State<_CustomerSheet> {
               child: _loading
                   ? const Center(child: CircularProgressIndicator())
                   : _rows.isEmpty
-                      ? Center(child: Text(t.noCustomerFound))
+                      ? Center(
+                          child: Text(widget.kind == 'supplier'
+                              ? t.noContact
+                              : t.noCustomerFound))
                       : ListView.builder(
                           itemCount: _rows.length,
                           itemBuilder: (_, i) {

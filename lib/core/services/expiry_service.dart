@@ -6,6 +6,7 @@ import '../database/database.dart';
 import '../logic/expiry.dart';
 import '../models/automation.dart';
 import '../models/product.dart';
+import '../l10n/v5_strings.dart';
 import 'automation_engine.dart';
 
 /// Produits classés selon leur péremption.
@@ -36,24 +37,46 @@ ExpiryReport buildExpiryReport(List<Product> products, DateTime now,
   return ExpiryReport(soon, expired);
 }
 
-/// Vérification quotidienne (au démarrage) : déclenche l'automatisation
-/// `AutoTrigger.productExpiry` pour chaque produit concerné, une seule
-/// fois par jour.
+/// Déclenchements quotidiens (une fois par jour, au démarrage) :
+/// - `productExpiry` pour les produits périmés ou qui expirent bientôt ;
+/// - `dailyReport` (rapport du jour).
 class ExpiryService {
   static const _kDay = 'expiry_check_day';
+  static const _kReportDay = 'daily_report_day';
+
+  static String _today(DateTime now) => '${now.year}-${now.month}-${now.day}';
 
   static Future<void> dailyCheck(AutomationEngine engine,
       {required int soonDays}) async {
     final db = AppDatabase.instance;
     final now = DateTime.now();
-    final today = '${now.year}-${now.month}-${now.day}';
-    if (await db.getSetting(_kDay) == today) return;
-    await db.setSetting(_kDay, today);
+    if (await db.getSetting(_kDay) == _today(now)) return;
+    await db.setSetting(_kDay, _today(now));
     final report =
         buildExpiryReport(await db.allProducts(), now, soonDays: soonDays);
+    if (report.isEmpty) return;
+    final rules = (await db.allAutomations())
+        .where((r) => r.enabled && r.trigger == AutoTrigger.productExpiry)
+        .toList();
+    if (rules.isEmpty) return;
+    // Les autres actions tournent produit par produit ; la notification est
+    // regroupée en UN seul message (pas 30 alertes d'affilée).
     for (final p in [...report.expired, ...report.soon].take(30)) {
-      await engine.fire(AutoTrigger.productExpiry, product: p);
+      await engine.fire(AutoTrigger.productExpiry, product: p, notify: false);
     }
+    if (rules.any((r) => r.actions.contains(AutoAction.notify))) {
+      engine.emit(engine.t.expiryNotifTitle,
+          engine.t.expiryNotifBody(report.soon.length, report.expired.length));
+    }
+  }
+
+  /// Rapport quotidien : déclenche les règles `dailyReport` une fois par jour.
+  static Future<void> dailyReport(AutomationEngine engine) async {
+    final db = AppDatabase.instance;
+    final now = DateTime.now();
+    if (await db.getSetting(_kReportDay) == _today(now)) return;
+    await db.setSetting(_kReportDay, _today(now));
+    await engine.fire(AutoTrigger.dailyReport);
   }
 }
 
@@ -106,6 +129,41 @@ class ExpiryNotifier {
       ),
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
     );
+  }
+
+  static bool _asked = false;
+
+  /// Notification immédiate (règles d'automatisation). Demande la
+  /// permission une seule fois par session si elle manque. Sans effet hors Android.
+  static Future<void> showNow(String title, String body) async {
+    if (!supported) return;
+    try {
+      await _init();
+      final android = _plugin.resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin>();
+      var allowed = await android?.areNotificationsEnabled() ?? false;
+      if (!allowed && !_asked) {
+        _asked = true;
+        allowed = await android?.requestNotificationsPermission() ?? false;
+      }
+      if (!allowed) return;
+      await _plugin.show(
+        DateTime.now().millisecondsSinceEpoch % 100000000,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'stocktout_rules',
+            'Automatisations',
+            channelDescription: 'Notifications des règles automatiques',
+            importance: Importance.defaultImportance,
+            priority: Priority.defaultPriority,
+          ),
+        ),
+      );
+    } catch (_) {
+      // Une notification manquée ne doit jamais bloquer l'application.
+    }
   }
 
   static Future<void> cancel() async {

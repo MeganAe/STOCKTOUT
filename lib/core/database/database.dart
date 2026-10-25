@@ -8,11 +8,14 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:uuid/uuid.dart';
 
 import '../logic/import_logic.dart';
+import '../logic/money.dart';
+import '../logic/purchases.dart';
 import '../models/automation.dart';
 import '../models/currency.dart';
 import '../models/expense.dart';
 import '../models/payment.dart';
 import '../models/product.dart';
+import '../models/purchase.dart';
 import '../models/sale.dart';
 import '../models/stock_movement.dart';
 import 'schema.dart';
@@ -136,6 +139,21 @@ class AppDatabase {
         await _db!.insert('automations', r.toMap());
       }
     }
+    // Règle « péremption » proposée une seule fois, y compris aux
+    // installations existantes (l'utilisateur peut ensuite la supprimer).
+    if (await getSetting('preset_expiry_added') != '1') {
+      await _db!.insert(
+        'automations',
+        AutomationRule(
+          id: 'preset-expiry',
+          name: 'preset_expiry',
+          trigger: AutoTrigger.productExpiry,
+          actions: const [AutoAction.notify],
+        ).toMap(),
+        conflictAlgorithm: ConflictAlgorithm.ignore,
+      );
+      await setSetting('preset_expiry_added', '1');
+    }
   }
 
   // ---------- Produits ----------
@@ -200,27 +218,67 @@ class AppDatabase {
   }
 
   /// Import par lots dans UNE transaction. [onProgress] reçoit (fait, total).
+  /// Chaque produit créé avec une quantité > 0 reçoit une entrée de stock,
+  /// chaque produit mis à jour dont la quantité change reçoit un ajustement.
   Future<void> applyImport(
     ImportPlan plan, {
     void Function(int done, int total)? onProgress,
+    String reason = 'Import',
   }) async {
     final total = plan.toCreate.length + plan.toUpdate.length;
     var done = 0;
     const chunk = 400;
     await _db!.transaction((txn) async {
+      // Quantités actuelles des produits à mettre à jour.
+      final oldQty = <String, double>{};
+      final ids = plan.toUpdate.map((e) => e.id).toList();
+      for (var i = 0; i < ids.length; i += 500) {
+        final part = ids.skip(i).take(500).toList();
+        final rows = await txn.query('products',
+            columns: ['id', 'quantity'],
+            where: 'id IN (${List.filled(part.length, '?').join(',')})',
+            whereArgs: part);
+        for (final r in rows) {
+          oldQty['${r['id']}'] = (r['quantity'] as num?)?.toDouble() ?? 0;
+        }
+      }
+
       Future<void> run(List<Product> list, bool create) async {
         for (var i = 0; i < list.length; i += chunk) {
           final batch = txn.batch();
-          for (final pr in list.skip(i).take(chunk)) {
+          final part = list.skip(i).take(chunk).toList();
+          for (final pr in part) {
             if (create) {
               batch.insert('products', pr.toMap());
+              if (pr.quantity > 0) {
+                batch.insert(
+                    'movements',
+                    StockMovement(
+                      productId: pr.id,
+                      type: MovementType.in_,
+                      quantity: pr.quantity,
+                      unitPrice: pr.buyPrice,
+                      reason: reason,
+                    ).toMap());
+              }
             } else {
               batch.update('products', pr.toMap(),
                   where: 'id = ?', whereArgs: [pr.id]);
+              final before = oldQty[pr.id] ?? pr.quantity;
+              if ((pr.quantity - before).abs() > 1e-9) {
+                batch.insert(
+                    'movements',
+                    StockMovement(
+                      productId: pr.id,
+                      type: MovementType.adjustment,
+                      quantity: pr.quantity,
+                      reason: '$reason (${_q(before)} → ${_q(pr.quantity)})',
+                    ).toMap());
+              }
             }
           }
           await batch.commit(noResult: true);
-          done += list.skip(i).take(chunk).length;
+          done += part.length;
           onProgress?.call(done, total);
           // Laisse respirer l'interface entre deux lots.
           await Future<void>.delayed(Duration.zero);
@@ -232,11 +290,14 @@ class AppDatabase {
     });
   }
 
-  Future<void> addMovement(StockMovement m) async {
-    await _db!.insert('movements', m.toMap());
-    // Met a jour la quantite produit.
+  Future<void> addMovement(StockMovement m) => _applyMovement(_db!, m);
+
+  /// Insère le mouvement ET met à jour la quantité du produit.
+  /// Utilisable dans une transaction (passer le `txn`).
+  Future<void> _applyMovement(DatabaseExecutor ex, StockMovement m) async {
+    await ex.insert('movements', m.toMap());
     final rows =
-        await _db!.query('products', where: 'id = ?', whereArgs: [m.productId]);
+        await ex.query('products', where: 'id = ?', whereArgs: [m.productId]);
     if (rows.isEmpty) return;
     final prod = Product.fromMap(rows.first);
     double qty = prod.quantity;
@@ -255,12 +316,55 @@ class AppDatabase {
       case MovementType.transfer:
         break;
     }
-    await _db!.update(
+    await ex.update(
       'products',
       {'quantity': qty, 'updated_at': DateTime.now().toIso8601String()},
       where: 'id = ?',
       whereArgs: [m.productId],
     );
+  }
+
+  static String _q(double v) =>
+      v == v.roundToDouble() ? v.toInt().toString() : v.toStringAsFixed(2);
+
+  /// Enregistre un produit (création ou modification) ET le mouvement de
+  /// stock correspondant, dans une seule transaction :
+  /// - création avec quantité > 0 : entrée « stock initial » ;
+  /// - modification de la quantité : ajustement (quantité = nouvelle valeur).
+  /// Si la quantité n'a pas été modifiée dans le formulaire ([quantityEdited]
+  /// faux), la quantité actuelle de la base est conservée (une vente peut
+  /// avoir eu lieu entre-temps).
+  Future<void> saveProductWithStock(
+    Product p, {
+    required bool quantityEdited,
+    required String reasonInitial,
+    required String reasonAdjust,
+  }) async {
+    await _db!.transaction((txn) async {
+      final rows =
+          await txn.query('products', where: 'id = ?', whereArgs: [p.id]);
+      final isNew = rows.isEmpty;
+      final oldQty = isNew ? 0.0 : Product.fromMap(rows.first).quantity;
+      final toSave =
+          (!isNew && !quantityEdited) ? p.copyWith(quantity: oldQty) : p;
+      await txn.insert('products', toSave.toMap(),
+          conflictAlgorithm: ConflictAlgorithm.replace);
+      final newQty = toSave.quantity;
+      if ((newQty - oldQty).abs() > 1e-9) {
+        await txn.insert(
+          'movements',
+          StockMovement(
+            productId: p.id,
+            type: isNew ? MovementType.in_ : MovementType.adjustment,
+            quantity: newQty,
+            unitPrice: isNew ? p.buyPrice : null,
+            reason: isNew
+                ? reasonInitial
+                : '$reasonAdjust (${_q(oldQty)} → ${_q(newQty)})',
+          ).toMap(),
+        );
+      }
+    });
   }
 
   Future<List<StockMovement>> movementsFor(String productId) async {
@@ -325,11 +429,12 @@ class AppDatabase {
     await _db!.delete('expenses', where: 'id = ?', whereArgs: [id]);
   }
 
-  // ---------- Clients ----------
-  /// Clients (kind = 'customer'), filtrés par nom ou téléphone.
-  Future<List<Map<String, Object?>>> customers({String query = ''}) async {
+  // ---------- Partenaires (clients 'customer' / fournisseurs 'supplier') ----------
+  /// Partenaires d'un type, filtrés par nom ou téléphone.
+  Future<List<Map<String, Object?>>> partnersOfKind(String kind,
+      {String query = ''}) async {
     final rows = await _db!.query('partners',
-        where: 'kind = ?', whereArgs: ['customer'], orderBy: 'name ASC');
+        where: 'kind = ?', whereArgs: [kind], orderBy: 'name ASC');
     if (query.trim().isEmpty) return rows;
     final q = query.trim().toLowerCase();
     return rows
@@ -339,12 +444,15 @@ class AppDatabase {
         .toList();
   }
 
-  /// Crée un client à la volée et retourne sa ligne.
-  Future<Map<String, Object?>> createCustomer(String name,
+  Future<List<Map<String, Object?>>> customers({String query = ''}) =>
+      partnersOfKind('customer', query: query);
+
+  /// Crée un partenaire à la volée et retourne sa ligne.
+  Future<Map<String, Object?>> createPartner(String kind, String name,
       {String? phone}) async {
     final row = <String, Object?>{
       'id': const Uuid().v4(),
-      'kind': 'customer',
+      'kind': kind,
       'name': name.trim(),
       'phone': phone?.trim(),
       'email': null,
@@ -353,6 +461,87 @@ class AppDatabase {
     };
     await _db!.insert('partners', row);
     return row;
+  }
+
+  Future<Map<String, Object?>> createCustomer(String name, {String? phone}) =>
+      createPartner('customer', name, phone: phone);
+
+  Future<void> updatePartner(String id, Map<String, Object?> values) async {
+    await _db!.update('partners', values, where: 'id = ?', whereArgs: [id]);
+  }
+
+  /// Nombre de ventes (client) ou d'achats (fournisseur) liés au partenaire.
+  Future<int> partnerLinkCount(String id, String kind) async {
+    final table = kind == 'supplier' ? 'purchases' : 'sales';
+    final col = kind == 'supplier' ? 'supplier_id' : 'customer_id';
+    final r = await _db!
+        .rawQuery('SELECT COUNT(*) AS n FROM $table WHERE $col = ?', [id]);
+    return (r.first['n'] as num?)?.toInt() ?? 0;
+  }
+
+  // ---------- Achats ----------
+  Future<List<Purchase>> allPurchases() async {
+    final rows = await _db!.query('purchases', orderBy: 'date DESC');
+    return rows.map(Purchase.fromRow).toList();
+  }
+
+  Future<void> insertPurchase(Purchase p) async {
+    await _db!.insert('purchases', p.toRow());
+  }
+
+  /// Réception d'un achat : entrée de stock par ligne + mise à jour du
+  /// prix d'achat des produits, dans UNE transaction. Le passage
+  /// `draft -> received` est fait en premier par une requête conditionnelle :
+  /// si l'achat n'est plus un brouillon (déjà reçu, annulé, double clic),
+  /// rien n'est modifié et la méthode retourne false.
+  Future<bool> receivePurchase(
+    String id, {
+    required Rates rates,
+    required String base,
+    required String reason,
+  }) {
+    return _db!.transaction((txn) async {
+      final changed = await txn.rawUpdate(
+          "UPDATE purchases SET status = 'received' WHERE id = ? AND status = 'draft'",
+          [id]);
+      if (changed != 1) return false;
+      final rows =
+          await txn.query('purchases', where: 'id = ?', whereArgs: [id]);
+      final p = Purchase.fromRow(rows.first);
+      for (final e in planReceipt(p, rates, base)) {
+        await _applyMovement(
+          txn,
+          StockMovement(
+            productId: e.productId,
+            type: MovementType.in_,
+            quantity: e.quantity,
+            unitPrice: e.newBuyPrice,
+            reference: p.number,
+            reason: reason,
+          ),
+        );
+        if (e.newBuyPrice != null) {
+          await txn.update(
+            'products',
+            {
+              'buy_price': e.newBuyPrice,
+              'updated_at': DateTime.now().toIso8601String(),
+            },
+            where: 'id = ?',
+            whereArgs: [e.productId],
+          );
+        }
+      }
+      return true;
+    });
+  }
+
+  /// Annule un brouillon (aucun effet sur le stock). False si déjà reçu/annulé.
+  Future<bool> cancelPurchase(String id) async {
+    final n = await _db!.rawUpdate(
+        "UPDATE purchases SET status = 'cancelled' WHERE id = ? AND status = 'draft'",
+        [id]);
+    return n == 1;
   }
 
   // ---------- Devises ----------

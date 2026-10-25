@@ -66,8 +66,9 @@ class _LockGateState extends ConsumerState<LockGate>
     try {
       unawaited(BackupService().autoBackupIfDue());
       final settings = ref.read(settingsProvider);
-      await ExpiryService.dailyCheck(ref.read(automationEngineProvider),
-          soonDays: settings.expiryDays);
+      final engine = ref.read(automationEngineProvider);
+      await ExpiryService.dailyCheck(engine, soonDays: settings.expiryDays);
+      await ExpiryService.dailyReport(engine);
       if (!mounted) return;
       if (settings.expiryNotify) await refreshExpiryNotification(ref);
     } catch (_) {}

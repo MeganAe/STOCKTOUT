@@ -124,7 +124,9 @@ class _ImportPageState extends ConsumerState<ImportPage> {
       _progress = 0;
     });
     try {
-      await AppDatabase.instance.applyImport(plan, onProgress: (d, total) {
+      await AppDatabase.instance.applyImport(plan,
+          reason: AppLocalizations.of(context).importProducts,
+          onProgress: (d, total) {
         if (mounted) setState(() => _progress = total == 0 ? 1 : d / total);
       });
       ref.invalidate(productsProvider);

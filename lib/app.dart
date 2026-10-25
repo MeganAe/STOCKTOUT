@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/l10n/app_localizations.dart';
 import 'core/providers/app_providers.dart';
 import 'core/theme/app_theme.dart';
+import 'core/services/notifier.dart';
 import 'widgets/app_shell.dart';
 import 'widgets/lock_gate.dart';
 
@@ -16,6 +17,7 @@ class StockToutApp extends ConsumerWidget {
     final settings = ref.watch(settingsProvider);
 
     return MaterialApp(
+      scaffoldMessengerKey: rootMessengerKey,
       title: 'StockTout',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),

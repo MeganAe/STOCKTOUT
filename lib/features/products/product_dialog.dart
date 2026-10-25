@@ -497,7 +497,15 @@ class _ProductDialogState extends State<ProductDialog> {
       imagePath: image,
       createdAt: existing?.createdAt,
     );
-    await AppDatabase.instance.upsertProduct(p);
+    final t = AppLocalizations.of(context);
+    // Produit + mouvement de stock (entrée initiale / ajustement) ensemble.
+    await AppDatabase.instance.saveProductWithStock(
+      p,
+      quantityEdited:
+          existing == null || (_num(_qty) - existing.quantity).abs() > 1e-9,
+      reasonInitial: t.stockInitial,
+      reasonAdjust: t.stockManualAdjust,
+    );
 
     // Memorise categorie / unite pour le prochain produit.
     final prefs = await SharedPreferences.getInstance();

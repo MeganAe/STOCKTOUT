@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/database/database.dart';
 import '../../core/l10n/app_localizations.dart';
+import '../../core/l10n/v5_strings.dart';
 import '../../core/models/automation.dart';
 import '../../core/providers/app_providers.dart';
 import '../../widgets/feature_tour.dart';
@@ -62,6 +63,8 @@ class _AutomationPageState extends ConsumerState<AutomationPage> {
         return t.presetDraftName;
       case 'preset_report':
         return t.presetReportName;
+      case 'preset_expiry':
+        return t.presetExpiryName;
       default:
         return r.name;
     }
@@ -75,6 +78,8 @@ class _AutomationPageState extends ConsumerState<AutomationPage> {
         return t.presetDraftDesc;
       case AutoTrigger.dailyReport:
         return t.presetReportDesc;
+      case AutoTrigger.productExpiry:
+        return t.presetExpiryDesc;
       default:
         return null;
     }
@@ -123,6 +128,8 @@ class _AutomationPageState extends ConsumerState<AutomationPage> {
                   final desc = r.description ?? _ruleDesc(t, r);
                   final actions =
                       r.actions.map((a) => _actionLabel(t, a)).join(' · ');
+                  final partial = !r.trigger.available ||
+                      r.actions.any((a) => !a.available);
                   return Card(
                     margin: const EdgeInsets.only(bottom: 8),
                     child: SwitchListTile(
@@ -143,9 +150,10 @@ class _AutomationPageState extends ConsumerState<AutomationPage> {
                       title: Text(_ruleName(t, r)),
                       subtitle: Text(
                         '${_triggerLabel(t, r.trigger)} → $actions'
-                        '${desc != null ? '\n$desc' : ''}',
+                        '${desc != null ? '\n$desc' : ''}'
+                        '${partial ? '\n⚠ ${t.ruleNotAvailable}' : ''}',
                       ),
-                      isThreeLine: desc != null,
+                      isThreeLine: desc != null || partial,
                       secondary: const Icon(Icons.bolt),
                     ),
                   );
@@ -162,8 +170,9 @@ class _AutomationPageState extends ConsumerState<AutomationPage> {
     final t = AppLocalizations.of(context);
     final name = TextEditingController(text: rule?.name ?? '');
     AutoTrigger trigger = rule?.trigger ?? AutoTrigger.stockLow;
+    // Les actions non implémentées ne sont pas sélectionnables.
     final selected = <AutoAction>{
-      ...(rule?.actions ?? [AutoAction.notify])
+      ...(rule?.actions ?? [AutoAction.notify]).where((a) => a.available)
     };
 
     final ok = await showDialog<bool>(
@@ -184,6 +193,7 @@ class _AutomationPageState extends ConsumerState<AutomationPage> {
                   DropdownButtonFormField<AutoTrigger>(
                     value: trigger,
                     items: AutoTrigger.values
+                        .where((e) => e.available || e == trigger)
                         .map((e) => DropdownMenuItem(
                             value: e, child: Text(_triggerLabel(t, e))))
                         .toList(),
@@ -200,14 +210,18 @@ class _AutomationPageState extends ConsumerState<AutomationPage> {
                         dense: true,
                         contentPadding: EdgeInsets.zero,
                         value: selected.contains(a),
-                        onChanged: (v) => setState(() {
-                          if (v == true) {
-                            selected.add(a);
-                          } else {
-                            selected.remove(a);
-                          }
-                        }),
+                        // Action non implémentée : visible mais désactivée.
+                        onChanged: !a.available
+                            ? null
+                            : (v) => setState(() {
+                                  if (v == true) {
+                                    selected.add(a);
+                                  } else {
+                                    selected.remove(a);
+                                  }
+                                }),
                         title: Text(_actionLabel(t, a)),
+                        subtitle: a.available ? null : Text(t.notAvailableYet),
                       )),
                 ],
               ),

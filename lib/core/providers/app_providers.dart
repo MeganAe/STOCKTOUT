@@ -12,6 +12,7 @@ import '../models/product.dart';
 import '../models/sale.dart';
 import '../services/automation_engine.dart';
 import '../services/currency_service.dart';
+import '../services/notifier.dart';
 import '../services/pin_service.dart';
 
 // ---------- Reglages ----------
@@ -63,7 +64,6 @@ class SettingsNotifier extends StateNotifier<AppSettings> {
     final cur = await db.getSetting('currency');
     final days = int.tryParse(await db.getSetting('expiry_days') ?? '');
     final notify = await db.getSetting('expiry_notify');
-    if (!mounted) return; // le fournisseur a pu être détruit pendant la lecture
     state = AppSettings(
       expiryDays: (days != null && days > 0) ? days : 30,
       expiryNotify: notify == '1',
@@ -127,6 +127,7 @@ final automationEngineProvider = Provider<AutomationEngine>((ref) {
   return AutomationEngine(
     AppDatabase.instance,
     AppLocalizations(settings.locale),
+    onNotify: AppNotifier.show,
   );
 });
 
@@ -220,7 +221,6 @@ class LockNotifier extends StateNotifier<LockState> {
   /// (démarrage de l'application).
   Future<void> reload({bool lockNow = false}) async {
     final enabled = await PinService().isEnabled();
-    if (!mounted) return; // détruit pendant la lecture (fermeture, tests)
     state = LockState(
       loaded: true,
       enabled: enabled,

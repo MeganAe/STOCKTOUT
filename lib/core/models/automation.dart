@@ -12,6 +12,10 @@ enum AutoTrigger {
   final String value;
   const AutoTrigger(this.value);
 
+  /// `scheduled` n'a ni horaire ni planificateur en arrière-plan : il n'est
+  /// jamais déclenché, il est donc désactivé dans l'interface.
+  bool get available => this != AutoTrigger.scheduled;
+
   static AutoTrigger from(String v) => values.firstWhere((e) => e.value == v,
       orElse: () => AutoTrigger.stockLow);
 }
@@ -27,6 +31,14 @@ enum AutoAction {
 
   final String value;
   const AutoAction(this.value);
+
+  /// Actions réellement implémentées. Les autres (impression sans
+  /// intervention, changement de prix, webhook) n'ont pas de réglages ni
+  /// d'exécution : elles sont désactivées dans l'interface.
+  bool get available =>
+      this == AutoAction.notify ||
+      this == AutoAction.createPurchaseDraft ||
+      this == AutoAction.exportCsv;
 
   static AutoAction from(String v) =>
       values.firstWhere((e) => e.value == v, orElse: () => AutoAction.notify);

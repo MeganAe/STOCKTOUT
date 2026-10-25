@@ -370,6 +370,86 @@ const _v5 = <String, Map<String, String>>{
   'cat_salary': {'en': 'Salaries', 'fr': 'Salaires'},
   'cat_supplies': {'en': 'Supplies', 'fr': 'Fournitures'},
   'cat_other': {'en': 'Other', 'fr': 'Autre'},
+  'presetExpiryName': {'en': 'Expiry alert', 'fr': 'Alerte péremption'},
+  'presetExpiryDesc': {
+    'en': 'Warns daily about expired or soon-to-expire products.',
+    'fr': 'Prévient chaque jour des produits périmés ou qui expirent bientôt.'
+  },
+  'notAvailableYet': {
+    'en': 'Not available yet',
+    'fr': 'Non disponible pour le moment'
+  },
+  'ruleNotAvailable': {
+    'en': 'Some options of this rule are not available and are ignored.',
+    'fr':
+        'Certaines options de cette règle ne sont pas disponibles et sont ignorées.'
+  },
+  'stockInitial': {'en': 'Initial stock', 'fr': 'Stock initial'},
+  'stockManualAdjust': {'en': 'Manual correction', 'fr': 'Correction manuelle'},
+  'cancelledLabel': {'en': 'Cancelled', 'fr': 'Annulé'},
+  'receivePurchaseTitle': {
+    'en': 'Receive the purchase',
+    'fr': 'Réceptionner l\'achat'
+  },
+  'purchaseAlreadyReceived': {
+    'en':
+        'This purchase is no longer a draft: it was already received or cancelled.',
+    'fr': 'Cet achat n\'est plus un brouillon : il a déjà été reçu ou annulé.'
+  },
+  'cancelPurchaseTitle': {
+    'en': 'Cancel the purchase',
+    'fr': 'Annuler l\'achat'
+  },
+  'purchaseCancelled': {'en': 'Purchase cancelled', 'fr': 'Achat annulé'},
+  'purchaseNeedsLine': {
+    'en': 'Add at least one line',
+    'fr': 'Ajoutez au moins une ligne'
+  },
+  'purchaseLines': {'en': 'Purchase lines', 'fr': 'Lignes de l\'achat'},
+  'addLine': {'en': 'Add a line', 'fr': 'Ajouter une ligne'},
+  'chooseSupplier': {'en': 'Choose a supplier', 'fr': 'Choisir un fournisseur'},
+  'searchSupplier': {
+    'en': 'Search a supplier…',
+    'fr': 'Rechercher un fournisseur…'
+  },
+  'unitCost': {'en': 'Unit cost', 'fr': 'Coût unitaire'},
+  'unitCostHint': {
+    'en': 'Updates the product\'s purchase price on receipt',
+    'fr': 'Met à jour le prix d\'achat du produit à la réception'
+  },
+  'saveDraft': {'en': 'Save as draft', 'fr': 'Enregistrer en brouillon'},
+  'saveAndReceive': {
+    'en': 'Save and receive',
+    'fr': 'Enregistrer et réceptionner'
+  },
+  'emailLabel': {'en': 'Email', 'fr': 'E-mail'},
+  'addressLabel': {'en': 'Address', 'fr': 'Adresse'},
+  'deleteContactAsk': {
+    'en': 'Permanently delete this contact?',
+    'fr': 'Supprimer définitivement ce contact ?'
+  },
+  'deleteContactDebt': {
+    'en':
+        '⚠ This customer still has a debt. It remains due and visible in the Debts screen.',
+    'fr':
+        '⚠ Ce client a encore une dette. Elle reste due et visible dans l\'écran Dettes.'
+  },
+  'receivePurchaseAsk': {
+    'en':
+        'Receive purchase {0}? Stock will be increased and purchase prices updated. This cannot be repeated.',
+    'fr':
+        'Réceptionner l\'achat {0} ? Le stock sera augmenté et les prix d\'achat mis à jour. Cette action ne peut pas être répétée.'
+  },
+  'cancelPurchaseAsk': {
+    'en': 'Cancel draft {0}? Stock is not changed.',
+    'fr': 'Annuler le brouillon {0} ? Le stock n\'est pas modifié.'
+  },
+  'linesCount': {'en': '{0} line(s)', 'fr': '{0} ligne(s)'},
+  'deleteContactTitle': {'en': 'Delete “{0}”?', 'fr': 'Supprimer « {0} » ?'},
+  'deleteContactLinks': {
+    'en': '{0} linked sale(s) or purchase(s) stay in the history.',
+    'fr': '{0} vente(s) ou achat(s) lié(s) restent dans l\'historique.'
+  },
 };
 
 extension V5Strings on AppLocalizations {
@@ -555,4 +635,37 @@ extension V5Strings on AppLocalizations {
   String get pinResetFinalTitle => _v('pinResetFinalTitle');
   String get pinResetFinalBody => _v('pinResetFinalBody');
   String get pinResetDo => _v('pinResetDo');
+  String get presetExpiryName => _v('presetExpiryName');
+  String get presetExpiryDesc => _v('presetExpiryDesc');
+  String get notAvailableYet => _v('notAvailableYet');
+  String get ruleNotAvailable => _v('ruleNotAvailable');
+  String get stockInitial => _v('stockInitial');
+  String get stockManualAdjust => _v('stockManualAdjust');
+  String get cancelledLabel => _v('cancelledLabel');
+  String get receivePurchaseTitle => _v('receivePurchaseTitle');
+  String get purchaseAlreadyReceived => _v('purchaseAlreadyReceived');
+  String get cancelPurchaseTitle => _v('cancelPurchaseTitle');
+  String get purchaseCancelled => _v('purchaseCancelled');
+  String get purchaseNeedsLine => _v('purchaseNeedsLine');
+  String get purchaseLines => _v('purchaseLines');
+  String get addLine => _v('addLine');
+  String get chooseSupplier => _v('chooseSupplier');
+  String get searchSupplier => _v('searchSupplier');
+  String get unitCost => _v('unitCost');
+  String get unitCostHint => _v('unitCostHint');
+  String get saveDraft => _v('saveDraft');
+  String get saveAndReceive => _v('saveAndReceive');
+  String get emailLabel => _v('emailLabel');
+  String get addressLabel => _v('addressLabel');
+  String get deleteContactAsk => _v('deleteContactAsk');
+  String get deleteContactDebt => _v('deleteContactDebt');
+  String receivePurchaseAsk(String a0) =>
+      _v('receivePurchaseAsk').replaceAll('{0}', '$a0');
+  String cancelPurchaseAsk(String a0) =>
+      _v('cancelPurchaseAsk').replaceAll('{0}', '$a0');
+  String linesCount(int a0) => _v('linesCount').replaceAll('{0}', '$a0');
+  String deleteContactTitle(String a0) =>
+      _v('deleteContactTitle').replaceAll('{0}', '$a0');
+  String deleteContactLinks(int a0) =>
+      _v('deleteContactLinks').replaceAll('{0}', '$a0');
 }

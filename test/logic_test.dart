@@ -7,6 +7,8 @@ import 'package:stocktout/core/logic/money.dart';
 import 'package:stocktout/core/logic/pin_logic.dart';
 import 'package:stocktout/core/logic/product_codes.dart';
 import 'package:stocktout/core/logic/product_lookup.dart';
+import 'package:stocktout/core/logic/purchases.dart';
+import 'package:stocktout/core/models/purchase.dart';
 import 'package:stocktout/core/logic/stats.dart';
 import 'package:stocktout/core/models/expense.dart';
 import 'package:stocktout/core/models/payment.dart';
@@ -559,6 +561,71 @@ void main() {
       expect(
           isBackupDue(now.subtract(const Duration(hours: 23)), now), isFalse);
       expect(isBackupDue(now.subtract(const Duration(hours: 25)), now), isTrue);
+    });
+  });
+
+  group('Achats', () {
+    test('JSON propre, ancien format relu, valeur illisible tolérée', () {
+      final lines = [
+        const PurchaseLine(
+            productId: 'a', productName: 'A', quantity: 2, unitCost: 1.5),
+        const PurchaseLine(productId: 'b', productName: 'B', quantity: 4),
+      ];
+      final back = parsePurchaseLines(encodePurchaseLines(lines));
+      expect(back.length, 2);
+      expect(back[0].unitCost, 1.5);
+      expect(back[1].unitCost, isNull);
+      final legacy = parsePurchaseLines('[{"product_id":"p","qty":7.5}]');
+      expect(legacy.first.quantity, 7.5);
+      expect(legacy.first.productId, 'p');
+      expect(parsePurchaseLines('pas du json'), isEmpty);
+      expect(parsePurchaseLines(null), isEmpty);
+      expect(parsePurchaseLines('{"a":1}'), isEmpty);
+    });
+    test('total et ligne de ligne', () {
+      final p = Purchase(
+        number: 'A-1',
+        currency: 'USD',
+        lines: const [
+          PurchaseLine(
+              productId: 'a', productName: 'A', quantity: 2, unitCost: 3),
+          PurchaseLine(
+              productId: 'b', productName: 'B', quantity: 1, unitCost: 4.5),
+        ],
+      );
+      expect(p.total, closeTo(10.5, 1e-9));
+      final r = Purchase.fromRow(p.toRow());
+      expect(r.total, closeTo(10.5, 1e-9));
+      expect(r.status, PurchaseStatus.draft);
+    });
+    test('plan de réception : cumul, conversion de devise, coût inconnu', () {
+      final p = Purchase(
+        number: 'A-2',
+        currency: 'CDF',
+        lines: const [
+          PurchaseLine(
+              productId: 'a', productName: 'A', quantity: 2, unitCost: 2850),
+          PurchaseLine(
+              productId: 'a', productName: 'A', quantity: 3, unitCost: 5700),
+          PurchaseLine(productId: 'b', productName: 'B', quantity: 1),
+          PurchaseLine(
+              productId: 'c', productName: 'C', quantity: 0, unitCost: 1),
+        ],
+      );
+      final plan = planReceipt(p, rates, 'USD');
+      expect(plan.length, 2);
+      expect(plan[0].productId, 'a');
+      expect(plan[0].quantity, 5);
+      expect(plan[0].newBuyPrice, closeTo(2, 1e-9)); // dernier coût gagne
+      expect(plan[1].productId, 'b');
+      expect(plan[1].newBuyPrice, isNull);
+    });
+    test('réception unique, annulation des brouillons seulement', () {
+      expect(canReceive(PurchaseStatus.draft), isTrue);
+      expect(canReceive(PurchaseStatus.received), isFalse);
+      expect(canReceive(PurchaseStatus.cancelled), isFalse);
+      expect(canCancel(PurchaseStatus.draft), isTrue);
+      expect(canCancel(PurchaseStatus.received), isFalse);
     });
   });
 

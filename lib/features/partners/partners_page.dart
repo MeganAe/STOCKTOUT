@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
-
 import '../../core/database/database.dart';
 import '../../core/l10n/app_localizations.dart';
+import '../../core/l10n/v5_strings.dart';
+import '../../core/logic/debts.dart';
+import '../../core/models/sale.dart';
 import '../../widgets/feature_tour.dart';
 
 class PartnersPage extends StatefulWidget {
@@ -100,14 +101,11 @@ class _PartnersPageState extends State<PartnersPage>
                 child: Text(name.isNotEmpty ? name[0].toUpperCase() : '?')),
             title: Text(name),
             subtitle: Text('${r['phone'] ?? ''} ${r['email'] ?? ''}'.trim()),
+            onTap: () => _editDialog(existing: r),
             trailing: IconButton(
               tooltip: t.delete,
               icon: const Icon(Icons.delete_outline),
-              onPressed: () async {
-                await AppDatabase.instance.db
-                    .delete('partners', where: 'id = ?', whereArgs: [r['id']]);
-                _load();
-              },
+              onPressed: () => _confirmDelete(r),
             ),
           ),
         );
@@ -115,26 +113,55 @@ class _PartnersPageState extends State<PartnersPage>
     );
   }
 
-  Future<void> _add() async {
+  Future<void> _add() => _editDialog();
+
+  /// Création ou modification d'un contact (nom, téléphone, e-mail,
+  /// adresse, notes).
+  Future<void> _editDialog({Map<String, Object?>? existing}) async {
     final t = AppLocalizations.of(context);
-    final kind = _tab.index == 0 ? 'customer' : 'supplier';
-    final name = TextEditingController();
-    final phone = TextEditingController();
+    final kind = existing?['kind'] as String? ??
+        (_tab.index == 0 ? 'customer' : 'supplier');
+    String v(String k) => '${existing?[k] ?? ''}';
+    final name = TextEditingController(text: v('name'));
+    final phone = TextEditingController(text: v('phone'));
+    final email = TextEditingController(text: v('email'));
+    final address = TextEditingController(text: v('address'));
+    final notes = TextEditingController(text: v('notes'));
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(kind == 'customer' ? t.newCustomer : t.newSupplier),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-                controller: name,
-                decoration: InputDecoration(labelText: t.contactName)),
-            const SizedBox(height: 12),
-            TextField(
-                controller: phone,
-                decoration: InputDecoration(labelText: t.phone)),
-          ],
+        title: Text(existing != null
+            ? t.edit
+            : (kind == 'customer' ? t.newCustomer : t.newSupplier)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                  controller: name,
+                  autofocus: existing == null,
+                  textCapitalization: TextCapitalization.words,
+                  decoration: InputDecoration(labelText: t.contactName)),
+              const SizedBox(height: 12),
+              TextField(
+                  controller: phone,
+                  keyboardType: TextInputType.phone,
+                  decoration: InputDecoration(labelText: t.phone)),
+              const SizedBox(height: 12),
+              TextField(
+                  controller: email,
+                  keyboardType: TextInputType.emailAddress,
+                  decoration: InputDecoration(labelText: t.emailLabel)),
+              const SizedBox(height: 12),
+              TextField(
+                  controller: address,
+                  decoration: InputDecoration(labelText: t.addressLabel)),
+              const SizedBox(height: 12),
+              TextField(
+                  controller: notes,
+                  decoration: InputDecoration(labelText: t.noteOptional)),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -145,17 +172,73 @@ class _PartnersPageState extends State<PartnersPage>
         ],
       ),
     );
-    if (ok == true && name.text.trim().isNotEmpty) {
-      await AppDatabase.instance.db.insert('partners', {
-        'id': const Uuid().v4(),
-        'kind': kind,
+    if (ok != true || name.text.trim().isEmpty) return;
+    final id = existing?['id'] as String?;
+    if (id == null) {
+      final row = await AppDatabase.instance
+          .createPartner(kind, name.text, phone: phone.text);
+      await AppDatabase.instance.updatePartner(row['id'] as String, {
+        'email': email.text.trim(),
+        'address': address.text.trim(),
+        'notes': notes.text.trim(),
+      });
+    } else {
+      await AppDatabase.instance.updatePartner(id, {
         'name': name.text.trim(),
         'phone': phone.text.trim(),
-        'email': '',
-        'address': '',
-        'notes': '',
+        'email': email.text.trim(),
+        'address': address.text.trim(),
+        'notes': notes.text.trim(),
       });
-      _load();
     }
+    _load();
+  }
+
+  /// Confirmation avant suppression. Prévient si le contact a des ventes
+  /// ou achats liés (ils restent dans l'historique) et surtout s'il a
+  /// encore une dette : elle reste due et visible dans l'écran Dettes.
+  Future<void> _confirmDelete(Map<String, Object?> r) async {
+    final t = AppLocalizations.of(context);
+    final id = '${r['id']}';
+    final kind = '${r['kind']}';
+    final name = '${r['name'] ?? ''}';
+    final links = await AppDatabase.instance.partnerLinkCount(id, kind);
+    var hasDebt = false;
+    if (kind == 'customer') {
+      final sales = (await AppDatabase.instance.allSales())
+          .map(Sale.fromRow)
+          .where((s) => s.customerId == id)
+          .toList();
+      final pay = await AppDatabase.instance.allPayments();
+      hasDebt = computeDebts(sales, pay, const {}, 'USD').isNotEmpty;
+    }
+    if (!mounted) return;
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        icon: Icon(hasDebt ? Icons.warning_amber_rounded : Icons.delete_outline,
+            color: hasDebt ? Colors.orange : null),
+        title: Text(t.deleteContactTitle(name)),
+        content: Text([
+          t.deleteContactAsk,
+          if (links > 0) t.deleteContactLinks(links),
+          if (hasDebt) t.deleteContactDebt,
+        ].join('\n\n')),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text(t.cancel)),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(t.delete),
+          ),
+        ],
+      ),
+    );
+    if (ok != true) return;
+    await AppDatabase.instance.db
+        .delete('partners', where: 'id = ?', whereArgs: [id]);
+    _load();
   }
 }
