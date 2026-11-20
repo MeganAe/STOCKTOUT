@@ -111,7 +111,12 @@ class _AppShellState extends ConsumerState<AppShell> {
     final inTabs = _tabs.contains(_index);
     return Scaffold(
       body: _pages[_index],
-      bottomNavigationBar: NavigationBar(
+      bottomNavigationBar: MediaQuery(
+        // Evite que la taille de police du telephone fasse deborder les libelles.
+        data: MediaQuery.of(context).copyWith(
+          textScaler: MediaQuery.of(context).textScaler.clamp(maxScaleFactor: 1.0),
+        ),
+        child: NavigationBar(
         selectedIndex: inTabs ? _tabs.indexOf(_index) : 4,
         onDestinationSelected: (i) {
           if (i == 4) {
@@ -147,6 +152,7 @@ class _AppShellState extends ConsumerState<AppShell> {
             label: t.more,
           ),
         ],
+      ),
       ),
     );
   }

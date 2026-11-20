@@ -88,6 +88,17 @@ jobs:
       - run: flutter config --enable-windows-desktop
       - run: flutter pub get
       - run: flutter build windows --release
+      - name: Embarquer le runtime Visual C++ (app-local)
+        shell: pwsh
+        run: |
+          $rel = "build/windows/x64/runner/Release"
+          foreach ($dll in "vcruntime140.dll","vcruntime140_1.dll","msvcp140.dll") {
+            if (-not (Test-Path "$rel/$dll")) {
+              Copy-Item "$env:WINDIR\System32\$dll" $rel
+            }
+            if (-not (Test-Path "$rel/$dll")) { throw "$dll introuvable dans $rel" }
+          }
+          Get-ChildItem $rel -Filter *.dll | Select-Object Name, Length
       - name: Package ZIP (x64)
         shell: pwsh
         run: |

@@ -16,7 +16,7 @@ class BackupInfo {
 }
 
 /// Sauvegarde automatique quotidienne, manuelle, restauration.
-/// Fichiers : <documents>/stocktout/backups/stocktout-backup-AAAAMMJJ-HHMMSS.zip
+/// Fichiers : <documents>/stocktout/backups/stocktout-backup-AAAAMMJJ-HHMMSS.stocktout
 class BackupService {
   BackupService([AppDatabase? db]) : db = db ?? AppDatabase.instance;
   final AppDatabase db;
@@ -110,8 +110,9 @@ class BackupService {
     }
   }
 
-  /// Restaure depuis un fichier choisi : `.zip` (nouveau format) ou `.db`
-  /// brut (ancien format). REMPLACE toutes les données actuelles.
+  /// Restaure depuis un fichier choisi : `.stocktout` / `.zip` (archive) ou `.db`
+  /// brut (ancien format). Le type est détecté sur le contenu, pas sur
+  /// l'extension. REMPLACE toutes les données actuelles.
   /// Une copie de sécurité « avant restauration » est créée d'abord.
   /// Lève [FormatException] si le fichier n'est pas une sauvegarde valide.
   Future<void> restoreFrom(String path) async {
@@ -183,7 +184,7 @@ class BackupService {
     try {
       final tmp = File(p.join(dir.path, '.pre.tmp.db'));
       await db.snapshotTo(tmp.path);
-      final out = File(p.join(dir.path, 'stocktout-avant-restauration.zip'));
+      final out = File(p.join(dir.path, 'stocktout-avant-restauration.$backupExtension'));
       await BackupArchive.write(
           dbSnapshot: tmp, imagesDir: await db.imagesDir(), out: out);
       await tmp.delete();
