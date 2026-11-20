@@ -1,15 +1,20 @@
+/// Extension propre à StockTout pour les sauvegardes (`.stocktout`).
+/// Le contenu reste une archive zip (base SQLite + photos) : seul le nom change.
+const backupExtension = 'stocktout';
+
 /// Nom d'une sauvegarde automatique/manuelle :
-/// `stocktout-backup-20261023-143005.zip`.
+/// `stocktout-backup-20261023-143005.stocktout`.
 String backupFileName(DateTime d) {
   String two(int v) => v.toString().padLeft(2, '0');
   return 'stocktout-backup-${d.year.toString().padLeft(4, '0')}${two(d.month)}${two(d.day)}'
-      '-${two(d.hour)}${two(d.minute)}${two(d.second)}.zip';
+      '-${two(d.hour)}${two(d.minute)}${two(d.second)}.$backupExtension';
 }
 
 final RegExp _backupRe = RegExp(
-    r'^stocktout-backup-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})\.zip$');
+    r'^stocktout-backup-(\d{4})(\d{2})(\d{2})-(\d{2})(\d{2})(\d{2})\.(?:stocktout|zip)$');
 
 /// Date contenue dans le nom d'une sauvegarde (null si ce n'en est pas une).
+/// Accepte `.stocktout` et l'ancien `.zip` : les anciennes sauvegardes restent listées.
 DateTime? parseBackupDate(String fileName) {
   final m = _backupRe.firstMatch(fileName);
   if (m == null) return null;

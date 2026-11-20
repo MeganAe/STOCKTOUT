@@ -94,7 +94,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         ref.watch(allProductsProvider).valueOrNull ?? products,
                         now,
                         soonDays: settings.expiryDays);
-                    return Wrap(
+                    // Telephone : 2 cartes par ligne, pleine largeur.
+                    // Grand ecran : cartes de 220 px qui se placent cote a cote.
+                    return LayoutBuilder(builder: (ctx, box) {
+                      const gap = 12.0;
+                      final cw = box.maxWidth < 600
+                          ? (box.maxWidth - gap) / 2
+                          : 220.0;
+                      return Wrap(
                       spacing: 12,
                       runSpacing: 12,
                       children: [
@@ -103,6 +110,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                               MaterialPageRoute<void>(
                                   builder: (_) => const DebtsPage())),
                           child: _StatCard(
+                              width: cw,
                               title: t.debts,
                               value: fmt(totalDebt(debts), settings.currency),
                               subtitle: t.debtors(debts.length),
@@ -112,6 +120,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         GestureDetector(
                           onTap: () => showExpiryList(context, expired: false),
                           child: _StatCard(
+                              width: cw,
                               title: t.expiringSoon,
                               value: '${report.soon.length}',
                               subtitle: t.withinDays(settings.expiryDays),
@@ -121,38 +130,45 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
                         GestureDetector(
                           onTap: () => showExpiryList(context, expired: true),
                           child: _StatCard(
+                              width: cw,
                               title: t.expired,
                               value: '${report.expired.length}',
                               icon: Icons.error_outline,
                               color: Colors.red),
                         ),
                         _StatCard(
+                              width: cw,
                             title: t.todaySales,
                             value: todayTotal.toStringAsFixed(2),
                             subtitle: settings.currency,
                             icon: Icons.payments,
                             color: Colors.green),
                         _StatCard(
+                              width: cw,
                             title: t.products,
                             value: '${products.length}',
                             icon: Icons.inventory_2),
                         _StatCard(
+                              width: cw,
                             title: t.stockValue,
                             value: value.toStringAsFixed(2),
                             subtitle: settings.currency,
                             icon: Icons.account_balance_wallet),
                         _StatCard(
+                              width: cw,
                             title: t.lowStock,
                             value: '${low.length}',
                             icon: Icons.warning_amber,
                             color: Colors.orange),
                         _StatCard(
+                              width: cw,
                             title: t.outOfStock,
                             value: '${out.length}',
                             icon: Icons.remove_shopping_cart,
                             color: Colors.red),
                       ],
                     );
+                    });
                   },
                 ),
               ),
@@ -287,8 +303,10 @@ class _StatCard extends StatelessWidget {
   final String? subtitle;
   final IconData icon;
   final Color? color;
+  final double width;
 
   const _StatCard({
+    required this.width,
     required this.title,
     required this.value,
     this.subtitle,
@@ -300,31 +318,42 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
+    final compact = width < 190;
     return SizedBox(
-      width: 220,
+      width: width,
       child: Card(
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(compact ? 12 : 16),
           child: Row(
             children: [
               CircleAvatar(
+                radius: compact ? 16 : 20,
                 backgroundColor: (color ?? scheme.primary).withOpacity(0.12),
-                child: Icon(icon, color: color ?? scheme.primary),
+                child: Icon(icon,
+                    size: compact ? 18 : 24, color: color ?? scheme.primary),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: compact ? 8 : 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(title,
-                        maxLines: 1,
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: text.bodySmall),
-                    Text(value,
-                        style: text.headlineSmall
-                            ?.copyWith(fontWeight: FontWeight.w700)),
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(value,
+                          maxLines: 1,
+                          style: text.headlineSmall
+                              ?.copyWith(fontWeight: FontWeight.w700)),
+                    ),
                     if (subtitle != null)
-                      Text(subtitle!, style: text.bodySmall),
+                      Text(subtitle!,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: text.bodySmall),
                   ],
                 ),
               ),

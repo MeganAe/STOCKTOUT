@@ -167,10 +167,10 @@ class AppTheme {
       ),
       navigationBarTheme: NavigationBarThemeData(
         elevation: 0,
-        height: 68,
+        height: 72,
         labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
         labelTextStyle: WidgetStatePropertyAll(
-          t.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+          t.bodySmall?.copyWith(fontWeight: FontWeight.w600, fontSize: 10.5),
         ),
       ),
       snackBarTheme: SnackBarThemeData(

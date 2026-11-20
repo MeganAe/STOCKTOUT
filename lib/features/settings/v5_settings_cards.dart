@@ -79,7 +79,7 @@ class _BackupCardState extends ConsumerState<BackupCard> {
 
   Future<void> _share(BackupInfo b) async {
     await LockGuard.external(() => Share.shareXFiles(
-        [XFile(b.file.path, mimeType: 'application/zip')],
+        [XFile(b.file.path, mimeType: 'application/octet-stream')],
         subject: 'StockTout backup'));
   }
 

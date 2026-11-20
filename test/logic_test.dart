@@ -536,7 +536,9 @@ void main() {
     test('nom et date', () {
       final d = DateTime(2026, 10, 23, 14, 30, 5);
       final n = backupFileName(d);
-      expect(n, 'stocktout-backup-20261023-143005.zip');
+      expect(n, 'stocktout-backup-20261023-143005.stocktout');
+      // Les anciennes sauvegardes .zip restent reconnues.
+      expect(parseBackupDate('stocktout-backup-20261023-143005.zip'), d);
       expect(parseBackupDate(n), d);
       expect(parseBackupDate('photo.jpg'), isNull);
     });
